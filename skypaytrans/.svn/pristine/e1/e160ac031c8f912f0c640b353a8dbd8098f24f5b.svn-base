@@ -1,0 +1,429 @@
+/*var totalUserClick = false, // as data is already shown when page loads
+regUserClick = true, tempUserClick = true, todayRegUserClick = true, todayTempUserClick = true;
+ */
+bluPay = new function() {
+	var $instance = this;
+	this.init = function(flag) {
+
+		var startDate, endDate;
+		$instance.initiateStartDatePicker();
+		$instance.initiateEndDatePicker();
+
+		if (!flag.localeCompare('all')) { // localCompare return 0 if content
+			// matches and 0 is false inside if
+			$instance.setDataTableBody("./getAllBluPayUsers?tod=n");
+
+		} else {
+
+			$instance.setDataTableBody("./getAllBluPayUsers?tod=y");
+			$("#userListHeadingDiv").text("New Users Today");
+		}
+		$('#totalUsersButton').click(
+				function() {
+					$instance.setDataTableBody("./getAllBluPayUsers?tod=n",
+							"All BluPay Users");
+					$instance.disableButton(this);
+
+				});
+
+		$('#totalRegisteredButton').click(
+				function() {
+					$instance.setDataTableBody("./getAllRegisteredBluPayUsers",
+							"Registered BluPay Users");
+					$instance.disableButton(this);
+
+				});
+
+		$('#totalUnregisteredButton').click(
+				function() {
+					$instance.setDataTableBody("./getAllTemporaryBluPayUsers",
+							"Unregistered BluPay Users");
+					$instance.disableButton(this);
+
+				});
+
+		$('#totalNewRegisteredButton').click(
+				function() {
+					$instance.setDataTableBody(
+							"./getRegisteredBluPayUsersToday",
+							"Today's Registered BluPay Users");
+					$instance.disableButton(this);
+
+				});
+
+		$('#totalNewUnregisteredButton').click(
+				function() {
+					$instance.setDataTableBody(
+							"./getTemporaryBluPayUsersToday",
+							"Today's Unregistered BluPay Users");
+					$instance.disableButton(this);
+
+				});
+
+		$('#totalNewRegisteredWeekButton').click(
+				function() {
+					$instance.setDataTableBody("./getCurrentWeekRegUsers",
+							"BluPay Users This Week");
+					$instance.disableButton(this);
+
+				});
+		$('#totalNewUnregisteredWeekButton').click(
+				function() {
+					$instance.setDataTableBody("./getCurrentWeekTempUsers",
+							"Unregistered Guests This Week");
+					$instance.disableButton(this);
+
+				});
+
+		$('#totalNewRegisteredMonthButton').click(
+				function() {
+					$instance.setDataTableBody("./getCurrentMonthRegUsers",
+							"Registered BluPay Users This Month");
+					$instance.disableButton(this);
+
+				});
+
+		$('#totalNewUnregisteredMonthButton').click(
+				function() {
+					$instance.setDataTableBody("./getCurrentMonthTempUsers",
+							"Unregistered Guests This Month");
+					$instance.disableButton(this);
+
+				});
+
+		$('#findUsersBtn').click(
+				function() {
+					startDate = $('#startdatepicker').val();
+					endDate = $('#enddatepicker').val();
+					var url = "../admin/getAllBluPayUsers/" + startDate + "/"
+							+ endDate + "/A";
+					$instance
+							.setUserDataForDateRange(url, startDate, endDate,
+									'BluPay Users from ' + startDate + ' to '
+											+ endDate);
+				});
+
+		$('#totalUsersDRButton').click(
+				function() {
+					var url = "../admin/getAllBluPayUsers/" + startDate + "/"
+					+ endDate + "/A";
+			$instance
+					.setUserDataForDateRange(url, startDate, endDate,
+							'BluPay Users from ' + startDate + ' to '
+									+ endDate);
+				});
+		
+		$('#totalRegisteredDRButton').click(
+				function() {
+					var url = "../admin/getAllBluPayUsers/" + startDate + "/"
+							+ endDate + "/P";
+					$instance.setUserDataForDateRange(url, startDate, endDate,
+							'Registered Users from ' + startDate + ' to '
+									+ endDate);
+				});
+
+		$('#totalUnregisteredDRButton').click(
+				function() {
+					var url = "../admin/getAllBluPayUsers/" + startDate + "/"
+							+ endDate + "/T";
+					$instance.setUserDataForDateRange(url, startDate, endDate,
+							'Unregistered Guests from ' + startDate + ' to '
+									+ endDate);
+				});
+
+	};
+
+	$instance.setDataTableBody = function(url, heading) {
+
+		$("#dateRangeUsersCountDiv").hide();
+		$("#userListHeadingDiv").text(heading);
+
+		var table = $('#bluePayUsersTable')
+				.DataTable(
+						{
+							responsive : true,
+							"destroy" : true,
+							dom : 'lBfrtip',
+							buttons : ['excelHtml5', 'csvHtml5',
+									'pdfHtml5' ],
+							/*"order" : [ [ 0, "desc" ] ],*/
+							"ajax" :{ 
+								"url":url,
+								error: function (xhr, httpStatusMessage, customErrorMessage) {
+				                    if (xhr.status === 400) {
+				                    	document.location.href="sessionout";
+				                      
+				                    }
+				                   }
+							},
+							/*"bSort" : false,*/
+							async:true,
+							"columns" : [
+									{
+										"data" : null
+									},
+									{
+										"data" : "firstName"
+									},
+									{
+										"data" : "phNumber"
+									},
+									{
+										"data" : "userType",
+										render : function(data, type, row, meta) {
+											if (data.includes('P')) {
+												data = 'Registered';
+											} else {
+												data = 'Unregistered';
+											}
+											return data;
+										}
+									},
+									{
+										"data" : "testUser",
+										render : function(data, type, row, meta) {
+											if (data == true) {
+												data = 'Y';
+											} else {
+												data = 'N';
+											}
+											return data;
+										}
+									},
+									{
+										"data" : "active",
+										render : function(data, type, row, meta) {
+
+											if (data == true) {
+												data = 'Y';
+											} else {
+												data = 'N';
+											}
+											return data;
+										}
+									},
+									{
+										"data" : "userDetail.starValue",
+
+									},
+									{
+										"data" : "usersTotalEarnedPoints.totalPointsEarned"
+									},
+									{
+										"data" : "createdOn"
+									},
+									{
+										"data" : "userDetail",
+										render : function(data, type, row, meta) {
+											var lat = data.latitude, lng = data.longitude;											
+											if (lat == null) {
+												data = "Not Available";
+											} else if (!lat.includes('0.0')
+													&& !lng.includes('0.0')) {
+												data = '<a href="http://maps.google.com/maps?q=loc:'
+														+ lat
+														+ ','
+														+ lng
+														+ '" target="_blank">View on Map</a>';
+											} else {
+												data = 'Not Available';
+											}
+											
+											
+
+											return data;
+										}
+									
+									} ,
+									
+									{
+										"data": "phNumber",
+											
+											
+												
+												render : function(data, type, row, meta) {
+													
+													data='<a href="findUserWithMob?mob='+data+'"> View Details</a>'
+												
+												return data;
+												}
+									}
+									]
+						});
+		table.on('order.dt search.dt', function() {
+			table.column(0, {
+				search : 'applied',
+				order : 'applied'
+			}).nodes().each(function(cell, i) {
+				cell.innerHTML = i + 1;
+			});
+		}).draw();
+	};
+
+	$instance.disableButton = function(clickedButton) {
+		var input = clickedButton;
+		input.disabled = true;
+		setTimeout(function() {
+			input.disabled = false;
+		}, 2000);
+	};
+
+	$instance.initiateStartDatePicker = function() {
+		$("#startdatepicker").datepicker({
+			dateFormat : 'yy-mm-dd',
+			inline : true
+		});
+	};
+
+	$instance.initiateEndDatePicker = function() {
+		$("#enddatepicker").datepicker({
+			dateFormat : 'yy-mm-dd',
+			inline : true
+		});
+	};
+
+	$instance.setUserDataForDateRange = function(url, startDate, endDate,
+			heading) {
+		console.log("url == " + url);
+		$instance.disableButton(this);
+		$.ajax({
+			type : "GET",
+			url : url,
+			async : true,
+			success : function(data) {
+				var dataSet = data.data;
+				var usersCount = data.userStats;
+				$instance.setUsersStatsForDateRange(usersCount);
+				$instance.setDataTableBodyForDateRangeUsers(dataSet, heading);
+			},
+			error : function(textStatus, errorThrown) {
+				alert('some error occurs. please try after sometime.')
+			}
+
+		});
+
+	}
+
+	$instance.setDataTableBodyForDateRangeUsers = function(dataSet, heading) {
+		$("#userListHeadingDiv").text(heading);
+		var table = $('#bluePayUsersTable')
+				.DataTable(
+						{
+							data : dataSet,
+							"destroy" : true,
+							dom : 'lBfrtip',
+							buttons : ['excelHtml5', 'csvHtml5',
+									'pdfHtml5' ],
+						/*	"order" : [ [ 0, "desc" ] ],*/
+							
+							columns : [
+									{
+										"data" : null
+									},
+
+									{
+										"data" : "firstName"
+									},
+									{
+										"data" : "phNumber"
+									},
+									{
+										"data" : "userType",
+										render : function(data, type, row, meta) {
+											if (data.includes('P')) {
+												data = 'Registered';
+											} else {
+												data = 'Unregistered';
+											}
+											return data;
+										}
+									},
+									{
+										"data" : "testUser",
+										render : function(data, type, row, meta) {
+											if (data == true) {
+												data = 'Yes';
+											} else {
+												data = 'No';
+											}
+											return data;
+										}
+									},
+									{
+										"data" : "active",
+										render : function(data, type, row, meta) {
+
+											if (data == true) {
+												data = 'Yes';
+											} else {
+												data = 'No';
+											}
+											return data;
+										}
+									},
+									{
+										"data" : "userDetail.starValue",
+
+									},
+									{
+										"data" : "usersTotalEarnedPoints.totalPointsEarned"
+									},
+									{
+										"data" : "createdOn"
+									},
+									{
+										"data" : "userDetail",
+										render : function(data, type, row, meta) {
+											var lat = data.latitude, lng = data.longitude;
+											if (lat == null) {
+												data = "Not Available";
+											} else if (!lat.includes('0.0')
+													&& !lng.includes('0.0')) {
+												data = '<a href="http://maps.google.com/maps?q=loc:'
+														+ lat
+														+ ','
+														+ lng
+														+ '" target="_blank">View on Map</a>';
+											} else {
+												data = 'Not Available';
+											}
+
+											return data;
+										}
+									
+                                        } ,
+									
+									{
+										"data": "phNumber",
+											
+											
+												
+												render : function(data, type, row, meta) {
+													
+													data='<a href="findUserWithMob?mob='+data+'"> View Details</a>'
+												
+												return data;
+												}
+										
+										
+									} ]
+						});
+		table.on('order.dt search.dt', function() {
+			table.column(0, {
+				search : 'applied',
+				order : 'applied'
+			}).nodes().each(function(cell, i) {
+				cell.innerHTML = i + 1;
+			});
+		}).draw();
+	}
+
+	$instance.setUsersStatsForDateRange = function(data) {
+		$("#dateRangeUsersCountDiv").show();
+		$('#totalUsersDRButton').text(data.totalUsers);
+		$('#totalRegisteredDRButton').text(data.totalPermanentUsers);
+		$('#totalUnregisteredDRButton').text(data.totalTemporaryUsers);
+
+	}
+
+};

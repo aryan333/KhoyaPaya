@@ -1,0 +1,26 @@
+package com.saifintex.domain;
+
+public class UsersPointsEarnedDetail extends BaseDomain{
+
+	private int pointsEarned;
+	private String name;
+	private String mobNumber;
+	public int getPointsEarned() {
+		return pointsEarned;
+	}
+	public void setPointsEarned(int pointsEarned) {
+		this.pointsEarned = pointsEarned;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public String getMobNumber() {
+		return mobNumber;
+	}
+	public void setMobNumber(String mobNumber) {
+		this.mobNumber = mobNumber;
+	}
+}

@@ -1,0 +1,25 @@
+function loadRemainingOtp(){
+	var spanTag=$("#otpRemaining");
+		
+	$.ajax({
+		type : "GET",
+		url : "../admin/getRemainingOTPs",
+		dataType : "text",
+		async : true,
+		success : function(data) {
+			if(data>10000){
+			spanTag.html("<span style='color:#2ad02a;'>"+data+"</span>");
+			}else{
+				spanTag.html(data);
+			}
+		},
+		error: function (xhr, httpStatusMessage, customErrorMessage) {
+            if (xhr.status === 400) {
+            	document.location.href="sessionout";
+              
+            }
+           }
+
+	});
+
+}

@@ -1,0 +1,185 @@
+package com.saifintex.entity;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+@Entity
+@Table(name="MerchantInfoSP")
+public class MerchantInfoBySalesPersonEntity extends BaseEntity {
+
+	private static final long serialVersionUID = 1L;
+	@Id
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	@Column(name="ID")
+	private long id;
+	 @Column(name="SalesPersonID")
+		private int salesPersonId;
+	 @Column(name="SalesPersonInviteCode")
+	 private String salesPersonInviteCode;
+    @Column(name="Name")
+	private String name;
+    @Column(name="MobileNumber")
+	private String mobileNumber;
+    @Column(name="Enterprise")
+	private String enterprise;
+    @Column(name="NatureOfBusiness")
+	private String natureOfBusiness;
+    public String getSalesPersonInviteCode() {
+		return salesPersonInviteCode;
+	}
+
+	public void setSalesPersonInviteCode(String salesPersonInviteCode) {
+		this.salesPersonInviteCode = salesPersonInviteCode;
+	}
+
+	@Column(name="Brands")
+	private String brands;
+    @Column(name="ShopArea")
+	private String shopArea;
+    @Column(name="InstallationStatus")
+	private String installationStatus;
+    @Column(name="InstallationMedium")
+	private String installationMedium;
+    @Column(name="DeviceModel")
+	private String deviceModel;
+   
+   
+    @Column(name="SalesPersonLat")
+	private String salesPersonlatitude;
+    @Column(name="SalesPersonLng")
+	
+	private String salesPersonlongitude;
+	
+
+    @Column(name="ShopBlobID")
+
+	private String shopBlobId;
+	
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getMobileNumber() {
+		return mobileNumber;
+	}
+
+	public void setMobileNumber(String mobileNumber) {
+		this.mobileNumber = mobileNumber;
+	}
+
+	public String getEnterprise() {
+		return enterprise;
+	}
+
+	public void setEnterprise(String enterprise) {
+		this.enterprise = enterprise;
+	}
+
+	
+
+	public String getNatureOfBusiness() {
+		return natureOfBusiness;
+	}
+
+	public void setNatureOfBusiness(String natureOfBusiness) {
+		this.natureOfBusiness = natureOfBusiness;
+	}
+
+	public String getBrands() {
+		return brands;
+	}
+
+	public void setBrands(String brands) {
+		this.brands = brands;
+	}
+
+	public String getShopArea() {
+		return shopArea;
+	}
+
+	public void setShopArea(String shopArea) {
+		this.shopArea = shopArea;
+	}
+
+	public String getInstallationStatus() {
+		return installationStatus;
+	}
+
+	public void setInstallationStatus(String installationStatus) {
+		this.installationStatus = installationStatus;
+	}
+
+	public String getInstallationMedium() {
+		return installationMedium;
+	}
+
+	public void setInstallationMedium(String installationMedium) {
+		this.installationMedium = installationMedium;
+	}
+
+	
+
+	public String getDeviceModel() {
+		return deviceModel;
+	}
+
+	public void setDeviceModel(String deviceModel) {
+		this.deviceModel = deviceModel;
+	}
+
+	
+
+
+
+	
+
+	public long getId() {
+		return id;
+	}
+
+	public void setId(long id) {
+		this.id = id;
+	}
+
+	public String getShopBlobId() {
+		return shopBlobId;
+	}
+
+	public void setShopBlobId(String shopBlobId) {
+		this.shopBlobId = shopBlobId;
+	}
+
+	public String getSalesPersonlatitude() {
+		return salesPersonlatitude;
+	}
+
+	public void setSalesPersonlatitude(String salesPersonlatitude) {
+		this.salesPersonlatitude = salesPersonlatitude;
+	}
+
+	public String getSalesPersonlongitude() {
+		return salesPersonlongitude;
+	}
+
+	public void setSalesPersonlongitude(String salesPersonlongitude) {
+		this.salesPersonlongitude = salesPersonlongitude;
+	}
+
+	public int getSalesPersonId() {
+		return salesPersonId;
+	}
+
+	public void setSalesPersonId(int salesPersonId) {
+		this.salesPersonId = salesPersonId;
+	}
+	
+	
+
+}

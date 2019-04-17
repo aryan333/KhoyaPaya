@@ -1,0 +1,892 @@
+package com.saifintex.controller.rest;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
+
+import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.MessageSource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.saifintex.common.AbstractBase;
+import com.saifintex.domain.ChangePassword;
+import com.saifintex.domain.FCMTokenParams;
+import com.saifintex.domain.ForgotPassword;
+import com.saifintex.domain.ForgotPin;
+import com.saifintex.domain.NotificationEnableParams;
+import com.saifintex.domain.Relations;
+import com.saifintex.domain.RewardPoints;
+import com.saifintex.domain.Roles;
+import com.saifintex.domain.SaiCards;
+import com.saifintex.domain.UpdatePin;
+import com.saifintex.domain.UpdateRelationParams;
+import com.saifintex.domain.UpdateUserParams;
+import com.saifintex.domain.User;
+import com.saifintex.domain.UserContactsDetail;
+import com.saifintex.domain.UserDetail;
+import com.saifintex.domain.UserLogin;
+import com.saifintex.domain.UserProfileParams;
+import com.saifintex.domain.UserWithOpponentUserBalance;
+import com.saifintex.domain.UsersPointsEarnedDetail;
+import com.saifintex.domain.UsersTotalEarnedPoints;
+import com.saifintex.dto.RelationsDTO;
+import com.saifintex.dto.RewardPointsDTO;
+import com.saifintex.dto.RolesDTO;
+import com.saifintex.dto.UserDTO;
+import com.saifintex.dto.UserDetailDTO;
+import com.saifintex.dto.UserPointsEarnedDetailDTO;
+import com.saifintex.dto.UserProfileDTO;
+import com.saifintex.dto.UserWithOpponentUserBalanceDto;
+import com.saifintex.dto.UsersTotalEarnedPointsDTO;
+import com.saifintex.exception.UserDoesNotExistException;
+import com.saifintex.services.BetaUsersService;
+import com.saifintex.services.UserService;
+import com.saifintex.services.UsersOTPService;
+import com.saifintex.utils.DateUtils;
+import com.saifintex.utils.NotificationThread;
+import com.saifintex.utils.ResponseCode;
+
+@RestController
+@RequestMapping(value = "/rest")
+public class UserRestController extends AbstractBase {
+
+	@Autowired
+	private MessageSource messageSource;
+
+	@Autowired
+	UserService userService;
+
+	@Value("${app.FCMAuthKey}")
+	public String authKey;
+
+	@Value("${app.user.exists}")
+	public String userExists;
+
+	@Value("${app.user.invalid.credentials}")
+	public String invalidCredentials;
+
+	@Value("${app.user.not.found}")
+	public String userNotFound;
+
+	@Value("${app.user.not.exists}")
+	public String notExists;
+
+	@Value("${phonno.not.empty}")
+	public String mobileNoCantEmpty;
+	
+
+	@Value("${app.standee.not.null.msg}")
+	public String standeeNotNullMsg;
+	
+	@Value("${phoneno.valid}")
+	public String mobileNoNotValid;
+
+	@Value("${app.gstin.cant.null}")
+	public String gstinCantNull;
+
+	@Value("${oldpassword.doesnot.match}")
+	public String oldPasswordDoesNotMatched;
+
+	@Value("${app.beta.unauthorized}")
+	public String betaUserUnAuthorised;
+
+	@Value("${app.otp.access.key}")
+	public String otpAPIAccessKey;
+
+	@Value("${otp.max.tried.message}")
+	public String manyOtpTriedMessage;
+
+	@Value("${otp.max.send.message}")
+	public String manyOtpSendMessage;
+
+	@Value("${otp.expire.message}")
+	public String otpExpiredMessage;
+
+	@Value("${otp.not.match.message}")
+	public String otpNotMatchedMessage;
+
+	@Value("${otp.generatetion.problem.message}")
+	public String otpGenProblemMessage;
+
+	@Autowired
+	NotificationThread notificationThread;
+	@Autowired
+	private BetaUsersService betaUsersService;
+
+	@Autowired
+	private UsersOTPService usersOtpService;
+
+	/* Users Registration API Created By Suraj */
+	@RequestMapping(value = "/public/register", method = RequestMethod.POST)
+	public ResponseEntity<?> userSignUp(@Valid @RequestBody User user, BindingResult bindResult)
+			throws ConstraintViolationException, Exception {
+		getLogger().info("register---------------------------------------------------");
+		getLogger().info("referral code is : = " + user.getReferralCode());
+		Map<String, Object> responseMap = new HashMap<String, Object>();
+		Map<String, String> map = isParamsValid(bindResult, messageSource);
+		if (!map.get("response").equals("ok")) {
+			return new ResponseEntity<Map<String, String>>(map, HttpStatus.BAD_REQUEST);
+		}
+		/*
+		 * if(!betaUsersService.isBetaUser(user.getPhNumber())){
+		 * responseMap.put("response", betaUserUnAuthorised); return new
+		 * ResponseEntity<Map<String,Object>>(responseMap,HttpStatus.UNAUTHORIZED); }
+		 */
+		UserDTO userDto = copyInDto(user);
+		UserDTO userDtoForExistance = userService.isUserAlreadyExist(userDto.getPhNumber());
+		if (userDtoForExistance == null) {
+			UserDTO uDto = userService.signUp(userDto);
+			if (uDto == null) {
+				responseMap.put("response", "failure");
+				return new ResponseEntity<Map<String, Object>>(responseMap, HttpStatus.BAD_REQUEST);
+			}
+
+			user = copyInDomain(uDto);
+
+			return new ResponseEntity<User>(user, HttpStatus.OK);
+
+		}
+		if (userDtoForExistance.getUserType().equalsIgnoreCase("P")) {
+			responseMap.put("response", userExists);
+			return new ResponseEntity<Map<String, Object>>(responseMap, HttpStatus.BAD_REQUEST);
+		} else if (userDtoForExistance.getUserType().equalsIgnoreCase("T")) {
+			userDto = userService.updateUser(userDto);
+			// userDto = userService.updateUser(userDtoForExistance);
+			if (userDto != null) {
+				User updatedUser = copyInDomain(userDto);
+				String token = userService.getToken(userDtoForExistance.getCreatedBy());
+				notifyAssociatedUsersWithTempUser(userDtoForExistance, user.getFirstName(), user.getPhNumber());
+				getLogger().info("Response done");
+				return new ResponseEntity<User>(updatedUser, HttpStatus.OK);
+
+			}
+		}
+		responseMap.put("response", "failure");
+		return new ResponseEntity<Map<String, Object>>(responseMap, HttpStatus.BAD_REQUEST);
+
+	}
+
+	/* Users Login API Created By Aryan */
+	@RequestMapping(value = "/public/login", method = RequestMethod.POST)
+	public ResponseEntity<?> userSignIn(@Valid @RequestBody UserLogin userLogin, BindingResult bindingResult)
+			throws Exception {
+		getLogger().info("login---------------------------------------------------");
+		getLogger().info("user ===  " + userLogin.getUserLogin());
+		Map<String, String> responseMap = new HashMap<String, String>();
+		Map<String, String> map = isParamsValid(bindingResult, messageSource);
+		if (!map.get("response").equals("ok")) {
+			return new ResponseEntity<Map<String, String>>(map, HttpStatus.BAD_REQUEST);
+		}
+
+		/*
+		 * if(!betaUsersService.isBetaUser(userLogin.getUserLogin())){
+		 * responseMap.put("response", betaUserUnAuthorised); return new
+		 * ResponseEntity<Map<String,String>>(responseMap,HttpStatus.UNAUTHORIZED); }
+		 */
+		Object obj = userService.signIn(userLogin.getUserLogin(), userLogin.getPassword(), userLogin.getLatitude(),
+				userLogin.getLongitude());
+
+		if (obj instanceof UserDTO) {
+			UserDTO userDto = (UserDTO) obj;
+			User user = copyInDomain(userDto);
+			return new ResponseEntity<User>(user, HttpStatus.OK);
+		}
+		if (obj instanceof Integer) {
+			int response = (Integer) obj;
+			if (response == ResponseCode.INVALID_PASSWORD) {
+				responseMap.put("response", invalidCredentials);
+			} else {
+				responseMap.put("response", userNotFound);
+			}
+		}
+
+		return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.BAD_REQUEST);
+	}
+
+	@RequestMapping(value = "/public/isUserExist", method = RequestMethod.POST)
+	public ResponseEntity<?> isUserExist(@RequestBody HashMap<String, String> map) throws Exception {
+		getLogger().info("----------------------isUserExist api -------------------------------------");
+
+		getLogger().info("----------------------isUserExist api  Part B B B B B -------------------------------------");
+		Map<String, String> responseMap = new HashMap<String, String>();
+
+		String mobile = map.get("phoneNo");
+		if (mobile == null || mobile.isEmpty() || mobile.length() == 0) {
+			responseMap.put("response", mobileNoCantEmpty);
+			return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.BAD_REQUEST);
+		} else if (!mobile.matches("[0-9]{10}+")) {
+			responseMap.put("response", mobileNoNotValid);
+			return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.BAD_REQUEST);
+		}
+
+		/*
+		 * if(!betaUsersService.isBetaUser(mobile)){ responseMap.put("response",
+		 * betaUserUnAuthorised); return new
+		 * ResponseEntity<Map<String,String>>(responseMap,HttpStatus.UNAUTHORIZED); }
+		 */
+		UserDTO userDto = userService.getUserByLogin(mobile);
+		if (userDto == null) {
+			responseMap.put("response", notExists);
+			return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.BAD_REQUEST);
+		} else if (userDto.getUserType().equalsIgnoreCase("T")) {
+			responseMap.put("response", notExists);
+			return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.BAD_REQUEST);
+		}
+		User user = copyInDomain(userDto);
+		return new ResponseEntity<User>(user, HttpStatus.OK);
+
+	}
+
+	/* Update password API Created By Ajay */
+	@RequestMapping(value = "/public/updatePassword", method = RequestMethod.POST)
+	public ResponseEntity<?> updateUserPassword(@Valid @RequestBody ForgotPassword forgotPass,
+			BindingResult bindingResult) throws Exception {
+		getLogger().info("update(forgot) password ------------------------------------");
+		Map<String, String> responseMap = new HashMap<String, String>();
+		Map<String, String> map = isParamsValid(bindingResult, messageSource);
+		if (!map.get("response").equals("ok")) {
+			return new ResponseEntity<Map<String, String>>(map, HttpStatus.BAD_REQUEST);
+		}
+		boolean result = userService.updateUserPassword(forgotPass);
+
+		if (result) {
+			responseMap.put("update", "true");
+			return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.OK);
+
+		}
+
+		responseMap.put("update", "false");
+		return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.BAD_REQUEST);
+	}
+
+	/* Save FCM Token API Created By Ajay */
+
+	@RequestMapping(value = "/private/updateToken", method = RequestMethod.POST)
+	public ResponseEntity<?> updateToken(@Valid @RequestBody FCMTokenParams fcmTokenParams,
+			BindingResult bindingResult) {
+		getLogger().info("========FCM TOKEN UPDATE API=======");
+		Map<String, String> responseMap = new HashMap<String, String>();
+		Map<String, String> map = isParamsValid(bindingResult, messageSource);
+		if (!map.get("response").equals("ok")) {
+			return new ResponseEntity<Map<String, String>>(map, HttpStatus.BAD_REQUEST);
+		}
+		int result = userService.updateFCMToken(fcmTokenParams.getUserId(), fcmTokenParams.getToken());
+		if (result > 0) {
+			responseMap.put("response", "success");
+			return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.OK);
+		}
+		responseMap.put("response", "failure");
+		return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.BAD_REQUEST);
+	}
+
+	@RequestMapping(value = "/private/getUserInfo/{userId}", method = RequestMethod.GET)
+	public ResponseEntity<?> getUserInfo(@PathVariable("userId") int userId) throws Exception {
+
+		getLogger().info("-------------------getUserInfo api--------userId ==" + userId);
+
+		Map<String, String> responseMap = new HashMap<String, String>();
+		if (userId == 0) {
+			responseMap.put("response", "userId can not be 0");
+			return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.BAD_REQUEST);
+		}
+		UserDTO userDTO = userService.getUserById(userId);
+		User user = null;
+		if (userDTO != null) {
+			user = copyInDomain(userDTO);
+			return new ResponseEntity<User>(user, HttpStatus.OK);
+		}
+		responseMap.put("response", userNotFound);
+		return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.BAD_REQUEST);
+	}
+
+	@RequestMapping(value = "/private/updateUserInfo", method = RequestMethod.POST)
+	public ResponseEntity<?> updateUser(@Valid @RequestBody UpdateUserParams userParams, BindingResult bindingResult)
+			throws Exception {
+		getLogger().info("updateUserInfo api--------------------------------------------------");
+
+		Map<String, String> responseMap = new HashMap<String, String>();
+
+		Map<String, String> map = isParamsValid(bindingResult, messageSource);
+
+		if (userParams.getUserId() == 0) {
+			getLogger().info("user id is zero!! not valid.");
+			responseMap.put("response", "something went wrong!!");
+			return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.BAD_REQUEST);
+		} else if (!map.get("response").equals("ok")) {
+			return new ResponseEntity<Map<String, String>>(map, HttpStatus.BAD_REQUEST);
+		}
+
+		boolean result = userService.updateUserInfo(userParams);
+
+		if (result) {
+			responseMap.put("response", "success");
+			return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.OK);
+		}
+		responseMap.put("response", "failure");
+		return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.BAD_REQUEST);
+	}
+
+	@RequestMapping(value = "/public/profileImage", method = RequestMethod.POST)
+	public ResponseEntity<?> updateProfileImage(@Valid @ModelAttribute("param") UserProfileParams param,
+			HttpSession session, BindingResult bindResult) throws Exception {
+		Map<String, String> responseMap = new HashMap<String, String>();
+		getLogger().info("profile image api -------------------------------------------");
+
+		String fileName = param.getFile().getOriginalFilename();
+		Map<String, String> map = isParamsValid(bindResult, messageSource);
+		if (!map.get("response").equals("ok")) {
+			return new ResponseEntity<Map<String, String>>(map, HttpStatus.BAD_REQUEST);
+		} else if (fileName.endsWith("jpg") || fileName.endsWith("png") || fileName.endsWith("gif")
+				|| fileName.endsWith("jpeg")) {
+			UserProfileDTO dto = new UserProfileDTO();
+			param.setCreatedOn(DateUtils.getCurrentDateTime());
+			param.setCreatedBy(param.getUserId());
+			BeanUtils.copyProperties(param, dto);
+			String blobId = userService.updateProfileImage(dto);
+
+			if (blobId != null) {
+				responseMap.put("response", blobId);
+				return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.OK);
+			}
+		}
+		responseMap.put("response", "failure");
+		return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.BAD_REQUEST);
+	}
+
+	/* Change password API Created By Leena */
+	@RequestMapping(value = "/private/changePassword", method = RequestMethod.POST)
+	public ResponseEntity<?> changeUserPassword(@Valid @RequestBody ChangePassword changePassword,
+			BindingResult bindResult) throws Exception {
+		getLogger().info("change password--------------------------------------------------------");
+		Map<String, String> responseMap = new HashMap<String, String>();
+		if (changePassword.getUserId() <= 0) {
+			responseMap.put("response", "Pass valid user id");
+			return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.BAD_REQUEST);
+		}
+		Map<String, String> map = isParamsValid(bindResult, messageSource);
+		if (!map.get("response").equals("ok")) {
+			return new ResponseEntity<Map<String, String>>(map, HttpStatus.BAD_REQUEST);
+		}
+		int result = userService.changePassword(changePassword);
+
+		if (result == ResponseCode.OLD_PASSWORD_DOES_NOT_MATCH) {
+			responseMap.put("response", oldPasswordDoesNotMatched);
+			getLogger().info("old password does not match");
+			return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.BAD_REQUEST);
+		}
+
+		if (result == ResponseCode.UPDATED_IN_DB) {
+			responseMap.put("response", "success");
+
+			return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.OK);
+		}
+
+		responseMap.put("response", "failure");
+		return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.BAD_REQUEST);
+	}
+
+	/*
+	 * API is use to create an temporary account if not exists @Ajay
+	 * here mappedName is using as a inviter name 
+	 */
+	@RequestMapping(value = "/private/addTempUser", method = RequestMethod.POST)
+	public ResponseEntity<?> insertTempUser(@RequestBody User user) {
+
+		getLogger().info("---------Add temp user api-------------");
+
+		UserDTO userDto = copyInDto(user);
+		UserWithOpponentUserBalanceDto userWithOpponentUserBalanceDto = userService.createTempUser(userDto);
+		UserWithOpponentUserBalance userWithOpponentUserBalance = copyInDomainUserWithOpponentUserBalance(
+				userWithOpponentUserBalanceDto);
+		// user = copyInDomain(userDto);
+		return new ResponseEntity<UserWithOpponentUserBalance>(userWithOpponentUserBalance, HttpStatus.OK);
+
+	}
+
+	private UserDTO copyInDto(User user) {
+		UserDTO userDto = new UserDTO();
+		BeanUtils.copyProperties(user, userDto);
+		UserDetailDTO userDetailDTO = new UserDetailDTO();
+		BeanUtils.copyProperties(user.getUserDetail(), userDetailDTO);
+		userDto.setUserDetailDTO(userDetailDTO);
+		Set<RolesDTO> rolesDtos = new HashSet<RolesDTO>();
+		RolesDTO roleDto = new RolesDTO();
+		Roles role = user.getRoles().iterator().next(); // at least one role must be there in domain.
+		BeanUtils.copyProperties(role, roleDto);
+		rolesDtos.add(roleDto);
+		userDto.setRolesDto(rolesDtos);
+		// set if there is reward point also
+		Set<RewardPoints> rewardPoints = user.getRewardPoints();
+		getLogger().info("reward points == " + rewardPoints);
+		if (rewardPoints != null && !rewardPoints.isEmpty()) {
+			RewardPoints rPoints = user.getRewardPoints().iterator().next(); // supposing only one reward point is
+																				// there.
+			Set<RewardPointsDTO> rewardPointsDTOs = new HashSet<RewardPointsDTO>();
+			RewardPointsDTO rPointsDto = new RewardPointsDTO();
+			BeanUtils.copyProperties(rPoints, rPointsDto);
+			rewardPointsDTOs.add(rPointsDto);
+			userDto.setRewardPointsDTOs(rewardPointsDTOs);
+		}
+
+		return userDto;
+	}
+
+	private User copyInDomain(UserDTO userDto) {
+		UserDetail userDetail = new UserDetail();
+		BeanUtils.copyProperties(userDto.getUserDetailDTO(), userDetail);
+
+		SaiCards saiCard = new SaiCards();
+		BeanUtils.copyProperties(userDto.getSaiCardDto(), saiCard);
+
+		Set<Roles> rolesDomainSet = new HashSet<Roles>();
+		Set<RolesDTO> rolesDtoSet = userDto.getRolesDto();
+		for (RolesDTO urd : rolesDtoSet) {
+			Roles roles = new Roles();
+			BeanUtils.copyProperties(urd, roles);
+			rolesDomainSet.add(roles);
+		}
+
+		User user = new User();
+		BeanUtils.copyProperties(userDto, user);
+		user.setPassword(null);
+		user.setSaiCards(saiCard);
+		user.setRoles(rolesDomainSet);
+		user.setUserDetail(userDetail);
+
+		Set<RewardPointsDTO> rDtos = userDto.getRewardPointsDTOs();
+		if (rDtos != null) {
+			Set<RewardPoints> set = new HashSet<RewardPoints>();
+			for (RewardPointsDTO dto : rDtos) {
+				RewardPoints rPoints = new RewardPoints();
+				BeanUtils.copyProperties(dto, rPoints);
+				set.add(rPoints);
+			}
+			user.setRewardPoints(set);
+		}
+		UsersTotalEarnedPointsDTO utdto = userDto.getUsersTotalEarnedPointsDTO();
+		if (utdto != null) {
+			UsersTotalEarnedPoints utep = new UsersTotalEarnedPoints();
+			BeanUtils.copyProperties(utdto, utep);
+			user.setUsersTotalEarnedPoints(utep);
+		}
+
+		return user;
+	}
+
+	/*
+	 * Api to check contacts exists in server?
+	 */
+
+	@RequestMapping(value = "/public/syncContacts", method = RequestMethod.POST)
+	public ResponseEntity<?> syncContacts(@RequestBody List<UserContactsDetail> listOfContacts) {
+		getLogger().info("============syncContacts===========");
+		getLogger().info("============ListSize===========" + listOfContacts.size());
+		// List<UserContactsDetailDTO> listOfContactsDetailDTO = new
+		// ArrayList<UserContactsDetailDTO>();
+		/*
+		 * for (UserContactsDetail contactsDetail : listOfContacts) {
+		 * UserContactsDetailDTO dto = new UserContactsDetailDTO();
+		 * BeanUtils.copyProperties(contactsDetail, dto);
+		 * listOfContactsDetailDTO.add(dto); }
+		 */
+		listOfContacts = userService.checkUserContactsExistance(listOfContacts);
+		/*
+		 * List<UserContactsDetail> list = new ArrayList<UserContactsDetail>(); for
+		 * (UserContactsDetailDTO dto : listOfContactsDetailDTO) { UserContactsDetail
+		 * userContactsDetail = new UserContactsDetail(); BeanUtils.copyProperties(dto,
+		 * userContactsDetail); list.add(userContactsDetail); }
+		 */
+		getLogger().info("==response committed for sync Contacts====");
+		return new ResponseEntity<List<UserContactsDetail>>(listOfContacts, HttpStatus.OK);
+	}
+
+	@RequestMapping(value = "/public/syncContactsD", method = RequestMethod.POST)
+	public ResponseEntity<?> syncContacts1(@RequestBody List<UserContactsDetail> listOfContacts) {
+		getLogger().info("============syncContacts===========");
+		getLogger().info("============ListSize===========" + listOfContacts.size());
+		// List<UserContactsDetailDTO> listOfContactsDetailDTO = new
+		// ArrayList<UserContactsDetailDTO>();
+		/*
+		 * for (UserContactsDetail contactsDetail : listOfContacts) {
+		 * UserContactsDetailDTO dto = new UserContactsDetailDTO();
+		 * BeanUtils.copyProperties(contactsDetail, dto);
+		 * listOfContactsDetailDTO.add(dto); }
+		 */
+		listOfContacts = userService.checkUserContactsExistanceD(listOfContacts);
+		/*
+		 * List<UserContactsDetail> list = new ArrayList<UserContactsDetail>(); for
+		 * (UserContactsDetailDTO dto : listOfContactsDetailDTO) { UserContactsDetail
+		 * userContactsDetail = new UserContactsDetail(); BeanUtils.copyProperties(dto,
+		 * userContactsDetail); list.add(userContactsDetail); }
+		 */
+		getLogger().info("==response committed for sync Contacts====");
+		return new ResponseEntity<List<UserContactsDetail>>(listOfContacts, HttpStatus.OK);
+	}
+
+	@RequestMapping(value = "/private/getStarValue/{userId}", method = RequestMethod.GET)
+	public ResponseEntity<?> getStarValudeHandler(@PathVariable("userId") int userId) {
+
+		UserDTO userDTO = userService.getStarValue(userId);
+
+		User user = new User();
+		UserDetail userDetail = new UserDetail();
+		BeanUtils.copyProperties(userDTO, user);
+		userDetail.setStarValue(userDetail.getStarValue());
+		user.setUserDetail(userDetail);
+		Map<String, BigDecimal> responseMap = new HashMap<String, BigDecimal>();
+		responseMap.put("starValue", userDTO.getUserDetailDTO().getStarValue());
+		return new ResponseEntity<Map<String, BigDecimal>>(responseMap, HttpStatus.OK);
+	}
+
+	private void notifyAssociatedUsersWithTempUser(UserDTO userDtoForExistance, String name, String phoneNumber) {
+		notificationThread.setAuthKey(authKey);
+		notificationThread.setName(name);
+		notificationThread.setPhone(phoneNumber);
+
+		List<UserDTO> list = userService.getAssociatedUsers(userDtoForExistance.getId());
+		notificationThread.setList(list);
+
+		Thread t = new Thread(notificationThread);
+		t.start();
+	}
+
+	@RequestMapping(value = "/public/getRelations", method = RequestMethod.GET)
+	public ResponseEntity<Map<String, List<Relations>>> masterRelationDataHandler() {
+		getLogger().info("======================master relation list api==================================");
+		List<RelationsDTO> dtoList = userService.getRelationsService();
+		List<Relations> list = new ArrayList<Relations>();
+		for (RelationsDTO dto : dtoList) {
+			Relations domain = new Relations();
+			BeanUtils.copyProperties(dto, domain);
+			list.add(domain);
+		}
+		Map<String, List<Relations>> responseMap = new HashMap<String, List<Relations>>();
+		responseMap.put("response", list);
+		return new ResponseEntity<Map<String, List<Relations>>>(responseMap, HttpStatus.OK);
+	}
+
+	@RequestMapping(value = "/public/saveRelation", method = RequestMethod.POST)
+	public ResponseEntity<Map<String, String>> relationHandler(@RequestBody UpdateRelationParams params) {
+		getLogger().info("=========save relation api=============================");
+		boolean result = userService.saveRelationService(params);
+		Map<String, String> responseMap = new HashMap<String, String>();
+		if (result) {
+			responseMap.put("response", "success");
+			return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.OK);
+		}
+		responseMap.put("response", "failure");
+		return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.OK);
+	}
+
+	@Value("${user.relation.default}")
+	private String relation;
+
+	@Value("${user.relation.id}")
+	private String relationId;
+
+	@RequestMapping(value = "/public/getMyRelation/{userId}/{oppId}", method = RequestMethod.GET)
+	public ResponseEntity<Map<String, String>> individualRelationHandler(@PathVariable int userId,
+			@PathVariable int oppId) {
+		getLogger().info("==================getMyRelation api =================");
+		Map<String, String> responseMap = userService.getIndividualRelationService(userId, oppId);
+		if (responseMap == null) {
+			responseMap = new HashMap<String, String>();
+			responseMap.put("relationId", relationId);
+			responseMap.put("relation", relation);
+		}
+		return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.OK);
+	}
+
+	@RequestMapping(value = "/private/savePin", method = RequestMethod.POST)
+	public ResponseEntity<?> savePinHandler(@RequestBody Map<String, String> requestParams) {
+		getLogger().info("========save pin api==========================");
+		getLogger().info("user id :" + requestParams.get("userId"));
+		boolean result = userService.savePinService(Integer.parseInt(requestParams.get("userId")),
+				requestParams.get("pin"));
+		Map<String, String> responseMap = new HashMap<String, String>();
+		if (result) {
+			responseMap.put("response", "success");
+			return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.OK);
+		}
+		responseMap.put("response", "failure");
+		return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.BAD_REQUEST);
+	}
+
+	@RequestMapping(value = "/private/isPinValid", method = RequestMethod.POST)
+	public ResponseEntity<Map<String, String>> isPinValid(@RequestBody Map<String, String> requestMap) {
+		int userId = Integer.parseInt(requestMap.get("userId"));
+		String pin = requestMap.get("pin");
+		getLogger().info("================Is Pin Valid API================");
+		boolean result = userService.isPinValid(userId, pin);
+
+		Map<String, String> responseMap = new HashMap<String, String>();
+		if (result) {
+			responseMap.put("response", "valid");
+			return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.OK);
+		}
+		responseMap.put("response", "invalid pin");
+		return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.BAD_REQUEST);
+	}
+
+	@RequestMapping(value = "/private/resetPin", method = RequestMethod.POST)
+	public ResponseEntity<Map<String, String>> resetPinService(@Valid @RequestBody ForgotPin forgotPin,
+			BindingResult bindResult) {
+		getLogger().info("==========reset pin api============");
+		getLogger().info("password == " + forgotPin.getPassword());
+
+		Map<String, String> responseMap = new HashMap<String, String>();
+		Map<String, String> map = isParamsValid(bindResult, messageSource);
+		if (!map.get("response").equals("ok")) {
+			return new ResponseEntity<Map<String, String>>(map, HttpStatus.BAD_REQUEST);
+		}
+		int result = userService.resetPinService(forgotPin);
+		if (result == ResponseCode.RECORD_NOT_FOUND) {
+			getLogger().info("userid not found");
+			responseMap.put("response", "invalid user");
+		} else if (result == ResponseCode.OLD_PASSWORD_DOES_NOT_MATCH) {
+			getLogger().info("invalid password");
+			responseMap.put("response", "invalid password");
+		} else if (result == ResponseCode.NOT_UPDATED_IN_DB) {
+			getLogger().info("some problem occurs.");
+			responseMap.put("response", "failure");
+		} else if (result == ResponseCode.UPDATED_IN_DB) {
+			getLogger().info("pin updated !!");
+			responseMap.put("response", "success");
+			return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.OK);
+		}
+		return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.BAD_REQUEST);
+	}
+
+	@RequestMapping(value = "/private/updatePin", method = RequestMethod.POST)
+	public ResponseEntity<?> updatePin(@Valid @RequestBody UpdatePin updatePin, BindingResult bindResult) {
+		getLogger().info("==========update pin  api============");
+		Map<String, String> map = isParamsValid(bindResult, messageSource);
+		if (!map.get("response").equals("ok")) {
+			return new ResponseEntity<Map<String, String>>(map, HttpStatus.BAD_REQUEST);
+		}
+		int result = userService.updatePin(updatePin);
+		Map<String, String> responseMap = new HashMap<String, String>();
+		if (result == ResponseCode.OLD_PASSWORD_DOES_NOT_MATCH) {
+			responseMap.put("response", "invalid old pin");
+			return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.BAD_REQUEST);
+		}
+		if (result == ResponseCode.UPDATED_IN_DB) {
+			responseMap.put("response", "success");
+			return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.OK);
+		}
+
+		responseMap.put("response", "failure");
+		return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.BAD_REQUEST);
+	}
+
+	@RequestMapping(value = "/private/setGstinNumber", method = RequestMethod.POST)
+	public ResponseEntity<?> saveGstinNumber(@RequestBody Map<String, String> requestParams) {
+		getLogger().info("========save pin api==========================");
+
+		int userId = Integer.parseInt(requestParams.get("userId"));
+		String gstinNumber = requestParams.get("gstinNumber");
+		Map<String, String> responseMap = new HashMap<String, String>();
+
+		if (userId == 0) {
+			responseMap.put("response", "User id can't be 0");
+			return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.BAD_REQUEST);
+		} else if (gstinNumber == null || gstinNumber.isEmpty()) {
+			responseMap.put("response", gstinCantNull);
+			return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.BAD_REQUEST);
+		}
+		boolean result = userService.saveGstinNumber(Integer.parseInt(requestParams.get("userId")),
+				requestParams.get("gstinNumber"));
+		if (result) {
+			responseMap.put("response", "success");
+			return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.OK);
+		}
+		responseMap.put("response", "failure");
+		return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.BAD_REQUEST);
+	}
+
+	@RequestMapping(value = "/private/getBalanceIfUserExist/{loggedInUserId}/{userLogin}", method = RequestMethod.GET)
+	public ResponseEntity<?> getBalanceIfUserExist(@PathVariable("loggedInUserId") int loggedInUserId,
+			@PathVariable("userLogin") String userLogin) {
+		getLogger().info("---------/getBalanceIfUserExist/------------");
+		Map<String, Object> responseMap = new HashMap<String, Object>();
+		if (userLogin == null || userLogin.isEmpty() || userLogin.length() == 0) {
+			responseMap.put("response", mobileNoCantEmpty);
+			return new ResponseEntity<Map<String, Object>>(responseMap, HttpStatus.BAD_REQUEST);
+		} else if (!userLogin.matches("[0-9]{10}+")) {
+			responseMap.put("response", mobileNoNotValid);
+			return new ResponseEntity<Map<String, Object>>(responseMap, HttpStatus.BAD_REQUEST);
+		}
+
+		UserWithOpponentUserBalanceDto userWithOpponentUserBalanceDto = userService
+				.getBalanceIfUserExist(loggedInUserId, userLogin);
+		if (userWithOpponentUserBalanceDto == null) {
+			responseMap.put("response", notExists);
+			return new ResponseEntity<Map<String, Object>>(responseMap, HttpStatus.BAD_REQUEST);
+
+		}
+		UserWithOpponentUserBalance userWithOpponentUserBalance = copyInDomainUserWithOpponentUserBalance(
+				userWithOpponentUserBalanceDto);
+		responseMap.put("response", userWithOpponentUserBalance);
+		return new ResponseEntity<Map<String, Object>>(responseMap, HttpStatus.OK);
+
+	}
+	
+	@RequestMapping(value = "/private/getBalanceIfStandeeUserExist/{loggedInUserId}/{standeeId}", method = RequestMethod.GET)
+	public ResponseEntity<?> getBalanceIfStandeeUserExist(@PathVariable("loggedInUserId") int loggedInUserId,
+			@PathVariable("standeeId") String standeeId) {
+		getLogger().info("---------/getBalanceIfStandeeUserExist/------------");
+		Map<String, Object> responseMap = new HashMap<String, Object>();
+		if (standeeId == null || standeeId.isEmpty() || standeeId.length() == 0) {
+			responseMap.put("response", standeeNotNullMsg);
+			return new ResponseEntity<Map<String, Object>>(responseMap, HttpStatus.BAD_REQUEST);
+		} 
+
+		UserWithOpponentUserBalanceDto userWithOpponentUserBalanceDto = userService
+				.getBalanceIfStandeeUserExist(loggedInUserId, standeeId);
+		if (userWithOpponentUserBalanceDto == null) {
+			responseMap.put("response", notExists);
+			return new ResponseEntity<Map<String, Object>>(responseMap, HttpStatus.BAD_REQUEST);
+
+		}
+		UserWithOpponentUserBalance userWithOpponentUserBalance = copyInDomainUserWithOpponentUserBalance(
+				userWithOpponentUserBalanceDto);
+		responseMap.put("response", userWithOpponentUserBalance);
+		return new ResponseEntity<Map<String, Object>>(responseMap, HttpStatus.OK);
+
+	}
+
+
+	@RequestMapping(value = "/private/setNotificationEnable", method = RequestMethod.POST)
+	public ResponseEntity<?> setNotificationEnableDisable(@RequestBody NotificationEnableParams params) {
+		getLogger().info("In setNotificationEnableDisable " + "UserId=" + params.getUserId() + "enable="
+				+ params.isNotificationEnabled());
+		UserDTO dto = userService.enableDisableNotification(params);
+		if (dto == null) {
+			throw new UserDoesNotExistException();
+		}
+		Map<String, String> responseMap = new HashMap<String, String>();
+		responseMap.put("response", "sucess");
+		return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.OK);
+	}
+
+	private UserWithOpponentUserBalance copyInDomainUserWithOpponentUserBalance(
+			UserWithOpponentUserBalanceDto userWithOpponentUserBalanceDto) {
+		UserWithOpponentUserBalance userWithOpponentUserBalance = new UserWithOpponentUserBalance();
+		BeanUtils.copyProperties(userWithOpponentUserBalanceDto, userWithOpponentUserBalance);
+		userWithOpponentUserBalance.setPassword("");
+		SaiCards saiCards = new SaiCards();
+		BeanUtils.copyProperties(userWithOpponentUserBalanceDto.getSaiCards(), saiCards);
+		UserDetail userDetail = new UserDetail();
+		BeanUtils.copyProperties(userWithOpponentUserBalanceDto.getUserDetail(), userDetail);
+		Set<Roles> roleSet = new HashSet<Roles>();
+		for (RolesDTO role : userWithOpponentUserBalanceDto.getRoles()) {
+			Roles roles = new Roles();
+			BeanUtils.copyProperties(role, roles);
+			roleSet.add(roles);
+		}
+		userWithOpponentUserBalance.setSaiCards(saiCards);
+		userWithOpponentUserBalance.setUserDetail(userDetail);
+		userWithOpponentUserBalance.setRoles(roleSet);
+		return userWithOpponentUserBalance;
+	}
+
+	@RequestMapping("/private/getEarnedPointsDetail/{userId}/{pageSize}")
+	public ResponseEntity<Map<String, List<UsersPointsEarnedDetail>>> usersEarnedPointsHandler(@PathVariable int userId,
+			@PathVariable int pageSize) {
+		getLogger().info("==========/getEarnedPointsDetail==========");
+		List<UserPointsEarnedDetailDTO> dtos = userService.getUserEarnedPointsDetail(userId, pageSize);
+		Map<String, List<UsersPointsEarnedDetail>> responseMap = new HashMap<String, List<UsersPointsEarnedDetail>>();
+		List<UsersPointsEarnedDetail> list = new ArrayList<UsersPointsEarnedDetail>();
+		if (dtos == null) {
+			responseMap.put("response", list);
+			return new ResponseEntity<Map<String, List<UsersPointsEarnedDetail>>>(responseMap, HttpStatus.OK);
+		}
+		for (UserPointsEarnedDetailDTO dto : dtos) {
+			UsersPointsEarnedDetail upeDetail = new UsersPointsEarnedDetail();
+			BeanUtils.copyProperties(dto, upeDetail);
+			list.add(upeDetail);
+		}
+		responseMap.put("response", list);
+		return new ResponseEntity<Map<String, List<UsersPointsEarnedDetail>>>(responseMap, HttpStatus.OK);
+	}
+
+	@RequestMapping(value = "/public/generateOTP", method = RequestMethod.POST)
+	public ResponseEntity<?> generateOTP(@RequestHeader("API-KEY") String apiKey,
+			@RequestBody Map<String, String> requestParams) {
+
+		Map<String, String> responseMap = new HashMap<String, String>();
+		if (!apiKey.equals(otpAPIAccessKey)) {
+			responseMap.put("response", "Bad API key");
+			return new ResponseEntity<String>("failure", HttpStatus.UNAUTHORIZED);
+		}
+		String mobileNumber = requestParams.get("mobileNumber");
+		Object object = usersOtpService.generateOTP(mobileNumber);
+		if (object instanceof Integer) {
+			Integer result = (Integer) object;
+			if (result == ResponseCode.TOO_MANY_OTP_SEND) {
+				responseMap.put("response", manyOtpSendMessage);
+				return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.BAD_REQUEST);
+
+			} else if (result == ResponseCode.TOO_MANY_OTP_TRIED) {
+				responseMap.put("response", manyOtpTriedMessage);
+				return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.BAD_REQUEST);
+
+			}
+		}
+
+		responseMap.put("response", "success");
+		return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.OK);
+	}
+
+	@RequestMapping(value = "/public/verifyOTP", method = RequestMethod.POST)
+	public ResponseEntity<?> verifyOTP(@RequestHeader("API-KEY") String apiKey,
+			@RequestBody Map<String, String> requestParams) {
+
+		Map<String, String> responseMap = new HashMap<String, String>();
+		if (!apiKey.equals(otpAPIAccessKey)) {
+			responseMap.put("response", "Bad API key");
+			return new ResponseEntity<String>("failure", HttpStatus.UNAUTHORIZED);
+		}
+		String mobileNumber = requestParams.get("mobileNumber");
+		String otp = requestParams.get("otp");
+		Object object = usersOtpService.verifyOTP(mobileNumber, otp);
+		if (object instanceof Integer) {
+			Integer result = (Integer) object;
+			if (result == ResponseCode.OTP_BLOCKED) {
+				responseMap.put("response", manyOtpTriedMessage);
+				return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.BAD_REQUEST);
+			} else if (result == ResponseCode.OTP_EXPIRED) {
+				responseMap.put("response", otpExpiredMessage);
+				return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.BAD_REQUEST);
+			}
+		} else {
+			Boolean result = (Boolean) object;
+			if (result) {
+				responseMap.put("response", "success");
+				return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.OK);
+			}
+		}
+		responseMap.put("response", otpNotMatchedMessage);
+		return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.BAD_REQUEST);
+	}
+
+}

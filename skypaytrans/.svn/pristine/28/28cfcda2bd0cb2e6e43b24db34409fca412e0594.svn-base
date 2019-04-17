@@ -1,0 +1,83 @@
+package com.saifintex.web.dto;
+
+import java.util.Date;
+
+public class UsersListDTO {
+
+	private int userId;
+	private String firstName;
+	private String salesPersonName;
+	private String phNumber;
+	private String latitude;
+	private String longitude;
+	private String address;
+	private Date createdOn;	
+	private Long txnCount;
+	private Date lastTransactionDate;
+	
+	
+	
+	public String getSalesPersonName() {
+		return salesPersonName;
+	}
+	public void setSalesPersonName(String salesPersonName) {
+		this.salesPersonName = salesPersonName;
+	}
+	
+	public int getUserId() {
+		return userId;
+	}
+	public void setUserId(int userId) {
+		this.userId = userId;
+	}
+	public String getFirstName() {
+		return firstName;
+	}
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+	public String getPhNumber() {
+		return phNumber;
+	}
+	public void setPhNumber(String phNumber) {
+		this.phNumber = phNumber;
+	}
+	public String getLatitude() {
+		return latitude;
+	}
+	public void setLatitude(String latitude) {
+		this.latitude = latitude;
+	}
+	public String getLongitude() {
+		return longitude;
+	}
+	public void setLongitude(String longitude) {
+		this.longitude = longitude;
+	}
+	public Date getCreatedOn() {
+		return createdOn;
+	}
+	public void setCreatedOn(Date createdOn) {
+		this.createdOn = createdOn;
+	}
+	public String getAddress() {
+		return address;
+	}
+	public void setAddress(String address) {
+		this.address = address;
+	}
+	
+	public Long getTxnCount() {
+		return txnCount;
+	}
+	public void setTxnCount(Long txnCount) {
+		this.txnCount = txnCount;
+	}
+	public Date getLastTransactionDate() {
+		return lastTransactionDate;
+	}
+	public void setLastTransactionDate(Date lastTransactionDate) {
+		this.lastTransactionDate = lastTransactionDate;
+	}
+	
+}

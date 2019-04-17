@@ -1,0 +1,41 @@
+package com.saifintex.web.dto;
+
+public class TotalReferalUserBySPDTO {
+	
+	private long overAllTotalCount;
+	private long totalCurrentDateCount;
+	private long totalYesterdayDateCount;
+	private long totalWeekCount;
+	private long totalUptoDateCount;
+	public long getOverAllTotalCount() {
+		return overAllTotalCount;
+	}
+	public void setOverAllTotalCount(long overAllTotalCount) {
+		this.overAllTotalCount = overAllTotalCount;
+	}
+	public long getTotalCurrentDateCount() {
+		return totalCurrentDateCount;
+	}
+	public void setTotalCurrentDateCount(long totalCurrentDateCount) {
+		this.totalCurrentDateCount = totalCurrentDateCount;
+	}
+	public long getTotalYesterdayDateCount() {
+		return totalYesterdayDateCount;
+	}
+	public void setTotalYesterdayDateCount(long totalYesterdayDateCount) {
+		this.totalYesterdayDateCount = totalYesterdayDateCount;
+	}
+	public long getTotalWeekCount() {
+		return totalWeekCount;
+	}
+	public void setTotalWeekCount(long totalWeekCount) {
+		this.totalWeekCount = totalWeekCount;
+	}
+	public long getTotalUptoDateCount() {
+		return totalUptoDateCount;
+	}
+	public void setTotalUptoDateCount(long totalUptoDateCount) {
+		this.totalUptoDateCount = totalUptoDateCount;
+	}
+
+}

@@ -1,0 +1,86 @@
+package com.saifintex.dao;
+
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.List;
+
+import com.saifintex.domain.TransactionsFilterParams;
+import com.saifintex.dto.TransactionSummaryParamsDto;
+import com.saifintex.entity.ItemMasterEntity;
+import com.saifintex.entity.TransactionsEntity;
+import com.saifintex.entity.UsersBalanceEntity;
+import com.saifintex.web.domain.Transactions;
+import com.saifintex.web.dto.TransactionStatsDashboardDTO;
+import com.saifintex.web.dto.TransactionsRecordDto;
+
+public interface TransactionDAO extends BaseDAO<TransactionsEntity, Long> {
+
+	public List<?> insert(TransactionsEntity transactionsEntity);
+
+	public List getAssociatedUsers(int userId, int pageSize);
+	public List getAllAssociatedUsers(int userId);
+
+	public List<Object[]> fetchTransactionHistory(int userId, int pageSize, String type);
+
+	/*
+	 * public TransactionsEntity rejectTransaction(TransactionActionParams
+	 * transactionActionParams);
+	 */
+
+	public List<TransactionsEntity> getAllTransactionsToUpdate(TransactionsEntity rejectedTransaction);
+
+	public TransactionsEntity getPreviousTransactionBetweenUsers(TransactionsEntity rejectedTransaction);
+
+	/*
+	 * public TransactionsEntity acceptTransaction(TransactionActionParams
+	 * transactionActionParams);
+	 */
+
+	public List<Object[]> pendingTransactions(int userId, int pageSize);
+
+	public List<TransactionsEntity> getLedger(int loggedInUserId, int oppositeUserId, int pageSize);
+
+	public List<Object[]> getMutualBalanceListWithUsersInfo(int userId, int pageSize);
+
+	public List<UsersBalanceEntity> getAllUserBalanceEntitiesWithUserId(int userId);
+
+	public long getPendingRequestsCount(int userId);
+
+	public List<TransactionsEntity> fetchTransactionsForCashInOutCalc(int userId);
+
+	public List<Object[]> fetchRecentUsers(int userId, int pageSize);
+
+	public List<ItemMasterEntity> fetchItem(int userId);
+
+	public List<TransactionsEntity> getDateWiseTransaction(int userId, String date);
+
+	public List<TransactionsEntity> getMonthWiseTransaction(int userId, int month, int year);
+
+	public List<TransactionsEntity> getQuarterlyTransaction(int userId, int fromMonth, int toMonth, int year);
+
+	public List<Object[]> getAllTransactions(String txnType, int pageSize, int length, String search,
+			com.saifintex.web.dto.TransactionsDTO transactionsWebDto);
+
+	public TransactionsRecordDto getTransactionsRecord();
+
+	public Long getTransactionsCount(String txnType, String search,
+			com.saifintex.web.dto.TransactionsDTO transactionsWebDto);
+
+	public TransactionStatsDashboardDTO getTransactionStats();
+
+	public TransactionStatsDashboardDTO getSpecificUserTransactionStats(int uId);
+
+	public TransactionSummaryParamsDto transactionSummary(int loggedInUserId, int opponentUserId);
+
+	public Object[] getTransactionByPayIdWithUserInfo(int userId, long payId);
+
+	public List<Object[]> findAllTodayTransactions(int userId, int pageSize, String type);
+	
+	public List<Object[]> filterTransactions(TransactionsFilterParams params,int pageSize);
+	
+	public long getTransactionsCount(Date date, Date startDate, Date endDate,String paymentStatus,boolean includeTestUsers);
+	
+	public BigDecimal getTransactionsValue(Date date, Date startDate, Date endDate,String paymentStatus,boolean includeTestUsers);
+
+	public List<Transactions> getTransactionsList(Date startDate, Date endDate, String paymentStatus, boolean includeTestUsers);
+}

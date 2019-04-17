@@ -1,0 +1,178 @@
+package com.saifintex.services.impl;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
+
+import javax.transaction.Transactional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import com.google.gson.JsonObject;
+import com.saifintex.common.AbstractBase;
+import com.saifintex.dao.NotificationDAO;
+import com.saifintex.dao.NotificationStatusDAO;
+import com.saifintex.dao.NotificationTypeDAO;
+import com.saifintex.dao.UsersInvitationsDetailDAO;
+import com.saifintex.domain.ReminderNotificationParams;
+import com.saifintex.entity.NotificationEntity;
+import com.saifintex.entity.NotificationStatusEntity;
+import com.saifintex.entity.NotificationTypeEntity;
+import com.saifintex.entity.UsersInvitationsDetailEntity;
+import com.saifintex.services.UserService;
+import com.saifintex.services.UsersInvitationsDetailService;
+import com.saifintex.utils.ApplicationProperties;
+import com.saifintex.utils.DateUtils;
+import com.saifintex.utils.FcmNotificationUtil;
+import com.saifintex.utils.SmsPromoThread;
+import com.saifintex.utils.SmsThread;
+import com.saifintex.utils.ThreadUtils;
+
+@Service
+@Transactional
+public class UsersInvitationsDetailServiceImpl extends AbstractBase implements UsersInvitationsDetailService {
+
+	@Autowired
+	private UsersInvitationsDetailDAO usersInvitationsDetailDAO;
+
+	@Value("${app.invitation.timelimit}")
+	private int invitationTimeLimit;
+
+	@Value("${app.invitation.sms.limit}")
+	private int invitationSMSLimit;
+
+	@Value("${app.invite.url1}")
+	private String appInviteUrl;
+
+	@Value("${app.invite.sms.template}")
+	private String smsTemplate;
+	
+	@Value("${app.FCMAuthKey}")
+	public String authKey;
+	@Value("${app.reminder.notification.rec}")
+	public String receivableNotification;
+	
+	@Value("${app.reminder.notification.pending}")
+	public String pendingNotifiacation;
+	
+	@Autowired
+	ApplicationProperties properties;
+	
+	@Autowired
+	NotificationTypeDAO notificationTypeDao;
+	
+	@Autowired
+	NotificationDAO notificationDao;
+	
+	@Autowired
+	NotificationStatusDAO notificationStatusDao;
+
+	
+	
+	@Autowired
+	UserService userService;
+	
+
+	@Override
+	public boolean sendInvitation(ReminderNotificationParams reminderNotificationParams) {
+		/*UsersInvitationsDetailEntity entity = usersInvitationsDetailDAO
+				.getByBothId(reminderNotificationParams.getPayerId(), reminderNotificationParams.getPayeeId());*/
+
+		//if (validateInvitation(entity)) {
+		    StringBuilder builder=	new StringBuilder("'");
+	        builder = new StringBuilder(reminderNotificationParams.getLoggedInUserName());
+	        builder.append("'");
+			builder.append(" " + smsTemplate + " " + reminderNotificationParams.getTotalBalance());
+			builder.append(" " + appInviteUrl);
+			builder.append(reminderNotificationParams.getSenderReferralCode());
+			SmsThread thread = new SmsThread(reminderNotificationParams.getRecipientMobileNumber(), builder.toString());
+			ThreadUtils.start(thread);
+			//entity.setSmsInviteCount(entity.getSmsInviteCount() + 1);
+			//entity.setInvitationSentDate(DateUtils.getCurrentDateTime());
+			return true;
+/*
+		} else {
+			return false;
+		}*/
+	}
+
+	private boolean validateInvitation(UsersInvitationsDetailEntity usersInvitationsDetailEntity) {
+
+		if (usersInvitationsDetailEntity.getInvitationSentDate() != null && getTransactionDuration(
+				usersInvitationsDetailEntity.getInvitationSentDate()) <= invitationTimeLimit) {
+			return false;
+		} else if (usersInvitationsDetailEntity.getSmsInviteCount() >= invitationSMSLimit) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+	private long getTransactionDuration(Date paymentDate) {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		Date now = new Date();
+		String modifiedDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(now);
+		sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+		Date endDate = null;
+		try {
+			endDate = sdf.parse(modifiedDate);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		long timeDiff = Math.abs(endDate.getTime() - paymentDate.getTime());
+		long duration = TimeUnit.MILLISECONDS.toHours(timeDiff);
+		return duration;
+	}
+
+	@Override
+	public void sendFcmReminder(ReminderNotificationParams params) {
+		String message=null;
+		String token=userService.getToken(params.getOpponentUserId());
+		
+		if(token!=null){
+			int senderId=params.getLoggedInUserId();
+			int receiverId=params.getOpponentUserId();
+			NotificationTypeEntity notificationTypeEntity=null;
+			NotificationStatusEntity nStatusEntity=notificationStatusDao.getOne(NotificationStatusEntity.class, 1);
+			
+		JsonObject data=new JsonObject();
+		if(params.getReminderType().equalsIgnoreCase("receivable")){
+			notificationTypeEntity=notificationTypeDao.getOne(NotificationTypeEntity.class, properties.getnTypeRemBalanceId());
+			data.addProperty("type", "pay");
+			data.addProperty("phoneNumber",params.getRecipientMobileNumber());
+			message=notificationTypeEntity.getNotificationTemplateEntity().getTemplateBody() +" "+params.getSkyCredit()+" by "+ params.getLoggedInUserName()+"";
+			
+		}else{
+			data.addProperty("type", "pending");
+			data.addProperty("phoneNumber",params.getRecipientMobileNumber());
+			message=params.getLoggedInUserName()+ " "
+					+" "+pendingNotifiacation+" "+params.getTotalBalance()+ " made on "+params.getPaymentDate()+"";
+			
+			
+		}
+		FcmNotificationUtil.sendNotification(token, message, authKey,data);
+		notificationDao.save(createNotificationEntity(senderId, receiverId, message, 
+				notificationTypeEntity.getNotificationTemplateEntity().getTemplateTitle(),
+				notificationTypeEntity, nStatusEntity));
+	}	
+	}
+	private NotificationEntity createNotificationEntity(int senderId,int receiverId,String message,String title,NotificationTypeEntity nTypeEntity,NotificationStatusEntity nSatusEntity) {
+		Date date=DateUtils.getCurrentDateTime();
+		NotificationEntity nEntity=new NotificationEntity();
+		nEntity.setNotificationTitle(title);
+		nEntity.setNotificationBody(message);
+		nEntity.setNotificationStatus(nSatusEntity);
+		nEntity.setNotificationTypeEntity(nTypeEntity);
+		nEntity.setModifiedBy(senderId);
+		nEntity.setCreatedBy(senderId);
+		nEntity.setCreatedOn(date);
+		nEntity.setModifiedOn(date);
+		nEntity.setSenderId(senderId);
+		nEntity.setReceiverId(receiverId);
+		return nEntity;
+	}
+}

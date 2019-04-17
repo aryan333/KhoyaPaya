@@ -1,0 +1,162 @@
+package com.saifintex.common;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.MessageSource;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+
+import com.saifintex.domain.User;
+import com.saifintex.dto.DashboardDataDateParams;
+import com.saifintex.dto.RolesDTO;
+import com.saifintex.dto.UserDetailDTO;
+import com.saifintex.entity.RolesEntity;
+import com.saifintex.entity.UserDetailsEntity;
+import com.saifintex.utils.DateUtils;
+import com.saifintex.web.domain.DashboardDateParamsJSP;
+import com.saifintex.web.dto.WebUsersDTO;
+import com.saifintex.web.entity.WebUsersEntity;
+
+public abstract class AbstractBase {
+	
+	@Value("${app.live.production.date}")
+	private String productionDate;
+	
+	@Value("${app.live.production.date.jsp}")
+	private String productionDateJSP;
+
+	protected Log log = null;
+
+	public Log getLogger() {
+		if (log == null)
+			log = (Log) LogFactory.getLog(getClass());
+		return log;
+	}
+
+	protected Map<String, String> isParamsValid(BindingResult bindResult, MessageSource messageSource) {
+		getLogger().info(" === is params valid ==");
+		Map<String, String> responseMap = new HashMap<String, String>();
+		if (bindResult.hasErrors()) {
+			System.out.println("has erororor");
+			FieldError error = bindResult.getFieldError();
+			String message = messageSource.getMessage(error, null);
+			responseMap.put("response", /* error.getField()+" "+ */message);
+			return responseMap;
+		}
+		responseMap.put("response", "ok");
+		return responseMap;
+	}
+
+	/**
+	 * Copy the one list of objects into another list of objects
+	 * 
+	 * @param First
+	 *            parameter as a list of object and second parameter as a object to
+	 *            be converted into
+	 * @return list of converted objects
+	 */
+	protected <T> List<T> copyList(List<? extends T> oldObjects, Class<?> clz) {
+		T newObject1 = null;
+		List<T> newObjectList = new ArrayList<T>();
+		for (T oldObject : oldObjects) {
+			try {
+				newObject1 = (T) clz.getClass().forName(clz.getName()).newInstance();
+			} catch (InstantiationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			BeanUtils.copyProperties(oldObject, newObject1);
+			newObjectList.add(newObject1);
+		}
+
+		return newObjectList;
+	}
+
+	protected WebUsersEntity copyWebUserDtoInEntity(WebUsersDTO webUsersDTO) {
+		WebUsersEntity wuEntity = new WebUsersEntity();
+		UserDetailsEntity udEntity = new UserDetailsEntity();
+		BeanUtils.copyProperties(webUsersDTO.getUserDetailDTO(), udEntity);
+		BeanUtils.copyProperties(webUsersDTO, wuEntity);
+		wuEntity.setUserDetailsEntity(udEntity);
+		RolesEntity rEntity = new RolesEntity();
+		BeanUtils.copyProperties(webUsersDTO.getRolesDTO().get(0), rEntity);
+		List<RolesEntity> list = new ArrayList<RolesEntity>();
+		list.add(rEntity);
+		wuEntity.setRoles(list);
+		return wuEntity;
+	}
+	
+	protected WebUsersDTO copyWebUserEntityInDto(WebUsersEntity webUsersEntity){
+		WebUsersDTO wuDto = new WebUsersDTO();
+		BeanUtils.copyProperties(webUsersEntity, wuDto);
+		UserDetailDTO udDto = new UserDetailDTO();
+		UserDetailsEntity udEntity = webUsersEntity.getUserDetailsEntity();
+		BeanUtils.copyProperties(udEntity, udDto);
+		wuDto.setUserDetailDTO(udDto);
+		List<RolesDTO> list = new ArrayList<RolesDTO>();
+		for (RolesEntity roles : webUsersEntity.getRoles()) {
+			RolesDTO dto = new RolesDTO();
+			BeanUtils.copyProperties(roles, dto);
+			list.add(dto);
+		}
+		wuDto.setRolesDTO(list);
+		return wuDto;
+	}
+	
+	 protected String getPrincipal() {
+		 Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		 if(authentication==null) {
+			 return null;
+		 }
+		//User user= (User)authentication.getPrincipal();
+		
+		 String currentPrincipalName = authentication.getName();
+		 return currentPrincipalName;
+	 }
+	 
+	 protected WebUsersDTO getWebUser() {
+		 Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		 if(authentication==null) {
+			 return null;
+		 }
+		 return (WebUsersDTO)authentication.getPrincipal();		
+	 }
+	
+	protected DashboardDataDateParams getDashboardDateParams() {
+		DashboardDataDateParams dateParams = new DashboardDataDateParams();
+		dateParams.setYesterdayDate(DateUtils.getDateBeforeCurrentDate(1));
+		dateParams.setEndDateOfWeek(DateUtils.getDateBeforeCurrentDate(2));
+		dateParams.setStartingDateOfWeek(DateUtils.getDateBeforeCurrentDate(8));
+		dateParams.setUptoDate(DateUtils.getDateBeforeCurrentDate(9));
+		dateParams.setStartingDate(DateUtils.getDate(productionDate));
+		return dateParams;
+	}
+	
+	protected DashboardDateParamsJSP getDashboardDateParamsInDDMMYYYYFormat() {
+		DashboardDateParamsJSP dateParams = new DashboardDateParamsJSP();
+		dateParams.setYesterdayDate(DateUtils.getDateBeforeCurrentDateInDDMMYYYYFormat(1));
+		dateParams.setEndDateOfWeek(DateUtils.getDateBeforeCurrentDateInDDMMYYYYFormat(2));
+		dateParams.setStartingDateOfWeek(DateUtils.getDateBeforeCurrentDateInDDMMYYYYFormat(8));
+		dateParams.setUptoDate(DateUtils.getDateBeforeCurrentDateInDDMMYYYYFormat(9));
+		dateParams.setStartingDate(productionDateJSP);
+		dateParams.setCurrentDate(DateUtils.getCurrentDateInDDMMYYYYFormat());
+		return dateParams;
+	}
+	
+
+}

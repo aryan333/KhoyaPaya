@@ -1,0 +1,80 @@
+package com.saifintex.controller.web;
+
+import java.io.IOException;
+import java.util.List;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.DefaultRedirectStrategy;
+import org.springframework.security.web.RedirectStrategy;
+import org.springframework.security.web.WebAttributes;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.stereotype.Controller;
+
+import com.saifintex.common.AbstractBase;
+
+@Controller
+public class AuthenticationSuccessHandleController extends AbstractBase implements AuthenticationSuccessHandler{
+
+	@Override
+	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
+			Authentication authentication) throws IOException, ServletException {	
+		setUserDetailInSession(authentication, request);
+		String url = getRedirectedUrl(request, response, authentication);
+		/*System.out.println("redirected url == "+url);*/
+		RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
+		redirectStrategy.sendRedirect(request, response, url);		
+		clearAuthenticationAttributes(request);
+	}
+	
+	private void setUserDetailInSession(Authentication authentication,HttpServletRequest request) {
+		UserDetails user = (UserDetails)authentication.getPrincipal();		
+		request.getSession().setAttribute("user", user);
+	}
+	
+	@SuppressWarnings("unchecked")
+	private String getRedirectedUrl(HttpServletRequest request, HttpServletResponse response,
+			Authentication authentication){		
+		List<SimpleGrantedAuthority> list = (List<SimpleGrantedAuthority>) authentication.getAuthorities();
+		String url = "";
+		for(GrantedAuthority authority:list) {
+			/*System.out.println("authority == "+authority);*/
+			switch (authority.getAuthority()) {
+			case "ROLE_1":
+				url = "/admin/dashboard";				
+				break;
+			case "ROLE_2":
+				url = "/admin/dashboard";
+				break;
+			case "ROLE_3":
+				url = "/admin/dashboard";
+				break;
+			case "ROLE_4":
+				url = "/admin/dashboard";
+				break;
+			case "ROLE_5":
+				url = "/admin/bugReports";
+				break;	
+			default:
+				url = "/admin/dashboard";
+			}
+		}
+		return url;
+	}
+
+	protected void clearAuthenticationAttributes(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            return;
+        }
+        session.removeAttribute(WebAttributes.AUTHENTICATION_EXCEPTION);
+    }
+	
+}

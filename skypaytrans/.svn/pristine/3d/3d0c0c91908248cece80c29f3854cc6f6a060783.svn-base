@@ -1,0 +1,10 @@
+package com.saifintex.dao;
+
+import com.saifintex.web.entity.QRUniqueSeriesEntity;
+
+public interface QRUniqueSeriesDAO extends BaseDAO<QRUniqueSeriesEntity, Long> {
+	
+	public QRUniqueSeriesEntity getBySeries(String series);
+	
+
+}

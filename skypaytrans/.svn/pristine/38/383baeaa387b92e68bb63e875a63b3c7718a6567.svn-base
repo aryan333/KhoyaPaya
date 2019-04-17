@@ -1,0 +1,297 @@
+package com.saifintex.entity;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.Date;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.Table;
+
+@Entity
+@Table(name = "Transactions",indexes={@Index(name = "idx_1",columnList="paymentDate,payerId,payeeId")})
+public class TransactionsEntity extends BaseEntity implements Serializable {
+
+	private static final long serialVersionUID = 1L;
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	@Column(name = "PayID")
+	private long payId;
+
+	@Column(name = "PayerID")
+	private int payerId;
+
+	@Column(name = "PayeeID")
+	private int payeeId;
+
+	@Column(name = "Amount", precision = 18, scale = 2)
+	private BigDecimal amount;
+
+	@Column(name = "Narration")
+	private String narration;
+
+	@Column(name = "PaymentDate")
+	private Date paymentDate;
+
+	@Column(name = "PaymentStatus", length = 30)
+	private String paymentStatus;
+
+	@Column(name = "BillAmount", precision = 18, scale = 2)
+	private BigDecimal billAmount;
+
+	@Column(name = "CashReceived", precision = 18, scale = 2)
+	private BigDecimal cashReceived;
+
+	@Column(name = "SkyCredit", precision = 18, scale = 2)
+	private BigDecimal skyCredit = BigDecimal.ZERO;
+	@Column(name = "PreviousBalance", precision = 18, scale = 2)
+
+	private BigDecimal previousBalance = BigDecimal.ZERO;
+	@Column(name = "TransactionType", length = 10)
+
+	private String transactionType;
+
+	@Column(name = "TransactionID",unique=true)
+	private String transactionId;
+
+	@Column(name = "InitiatedFrom")
+	private int initiatedFrom;
+
+	@Column(name = "latitude", length = 100)
+	private String latitude;
+
+	@Column(name = "longitude", length = 100)
+	private String longitude;
+
+	@Column(name = "ConfirmLatitude", length = 100)
+	private String confirmLatitude;
+
+	@Column(name = "ConfirmLongitude", length = 100)
+	private String confirmLongitude;
+
+	@Column(name = "Category", length = 27)
+	private String category;
+	
+	@Column(name="IsGSTEnabled")
+	private boolean isGSTEnabled;
+	@Column(name="CurrTranPrevBal")
+	private BigDecimal currTranPrevBal;
+	@Column(name="CurrPaymentStatus")
+	private BigDecimal currentPaymentStatus;
+	
+	@Column(name = "UserType")
+	private String userType;
+
+	@Column(name="BillNumber")
+	
+	private String billNumber;
+	@Column(name = "InvoiceBlobId", length = 100)
+	private String invoiceBlobId;
+	
+	public String getUserType() {
+		return userType;
+	}
+
+	public void setUserType(String userType) {
+		this.userType = userType;
+	}
+
+	public boolean isGSTEnabled() {
+		return isGSTEnabled;
+	}
+
+	public void setGSTEnabled(boolean isGSTEnabled) {
+		this.isGSTEnabled = isGSTEnabled;
+	}
+
+	public long getPayId() {
+		return payId;
+	}
+
+	public void setPayId(long payId) {
+		this.payId = payId;
+	}
+
+	public int getPayerId() {
+		return payerId;
+	}
+
+	public void setPayerId(int payerId) {
+		this.payerId = payerId;
+	}
+
+	public int getPayeeId() {
+		return payeeId;
+	}
+
+	public void setPayeeId(int payeeId) {
+		this.payeeId = payeeId;
+	}
+
+	public BigDecimal getAmount() {
+		return amount;
+	}
+
+	public void setAmount(BigDecimal amount) {
+		this.amount = amount;
+	}
+
+	public String getNarration() {
+		return narration;
+	}
+
+	public void setNarration(String narration) {
+		this.narration = narration;
+	}
+
+	public Date getPaymentDate() {
+		return paymentDate;
+	}
+
+	public void setPaymentDate(Date paymentDate) {
+		this.paymentDate = paymentDate;
+	}
+
+	public String getPaymentStatus() {
+		return paymentStatus;
+	}
+
+	public void setPaymentStatus(String paymentStatus) {
+		this.paymentStatus = paymentStatus;
+	}
+
+	public BigDecimal getBillAmount() {
+		return billAmount;
+	}
+
+	public void setBillAmount(BigDecimal billAmount) {
+		this.billAmount = billAmount;
+	}
+
+	public BigDecimal getCashReceived() {
+		return cashReceived;
+	}
+
+	public void setCashReceived(BigDecimal cashReceived) {
+		this.cashReceived = cashReceived;
+	}
+
+	public BigDecimal getSkyCredit() {
+		return skyCredit;
+	}
+
+	public void setSkyCredit(BigDecimal skyCredit) {
+		this.skyCredit = skyCredit;
+	}
+
+	public BigDecimal getPreviousBalance() {
+		return previousBalance;
+	}
+
+	public void setPreviousBalance(BigDecimal previousBalance) {
+		this.previousBalance = previousBalance;
+	}
+
+	public String getTransactionType() {
+		return transactionType;
+	}
+
+	public void setTransactionType(String transactionType) {
+		this.transactionType = transactionType;
+	}
+
+	public String getTransactionId() {
+		return transactionId;
+	}
+
+	public void setTransactionId(String transactionId) {
+		this.transactionId = transactionId;
+	}
+
+	public int getInitiatedFrom() {
+		return initiatedFrom;
+	}
+
+	public void setInitiatedFrom(int initiatedFrom) {
+		this.initiatedFrom = initiatedFrom;
+	}
+
+	public String getLatitude() {
+		return latitude;
+	}
+
+	public void setLatitude(String latitude) {
+		this.latitude = latitude;
+	}
+
+	public String getLongitude() {
+		return longitude;
+	}
+
+	public void setLongitude(String longitude) {
+		this.longitude = longitude;
+	}
+
+	public String getConfirmLatitude() {
+		return confirmLatitude;
+	}
+
+	public void setConfirmLatitude(String confirmLatitude) {
+		this.confirmLatitude = confirmLatitude;
+	}
+
+	public String getConfirmLongitude() {
+		return confirmLongitude;
+	}
+
+	public void setConfirmLongitude(String confirmLongitude) {
+		this.confirmLongitude = confirmLongitude;
+	}
+
+	public String getCategory() {
+		return category;
+	}
+
+	public void setCategory(String category) {
+		this.category = category;
+	}
+
+	public BigDecimal getCurrTranPrevBal() {
+		return currTranPrevBal;
+	}
+
+	public void setCurrTranPrevBal(BigDecimal currTranPrevBal) {
+		this.currTranPrevBal = currTranPrevBal;
+	}
+
+	public BigDecimal getCurrentPaymentStatus() {
+		return currentPaymentStatus;
+	}
+
+	public void setCurrentPaymentStatus(BigDecimal currentPaymentStatus) {
+		this.currentPaymentStatus = currentPaymentStatus;
+	}
+
+	public String getBillNumber() {
+		return billNumber;
+	}
+
+	public void setBillNumber(String billNumber) {
+		this.billNumber = billNumber;
+	}
+
+	public String getInvoiceBlobId() {
+		return invoiceBlobId;
+	}
+
+	public void setInvoiceBlobId(String invoiceBlobId) {
+		this.invoiceBlobId = invoiceBlobId;
+	}
+
+	
+}

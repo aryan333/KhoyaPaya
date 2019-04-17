@@ -1,0 +1,208 @@
+package com.saifintex.controller.web;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import com.saifintex.common.AbstractBase;
+import com.saifintex.dto.RolesDTO;
+import com.saifintex.dto.UserDetailDTO;
+import com.saifintex.services.WebUsersService;
+import com.saifintex.utils.ResponseCode;
+import com.saifintex.web.domain.ResetPasswordWeb;
+import com.saifintex.web.domain.WebUsers;
+import com.saifintex.web.dto.WebUsersDTO;
+
+@Controller
+//@SessionAttributes("webUsers")
+@RequestMapping("/admin")
+public class WebUsersController extends AbstractBase {
+
+	@Autowired
+	private WebUsersService webUsersService;
+
+	@Autowired
+	private MessageSource messageSource;
+
+	@RequestMapping("/")
+	public String viewLoginPage(RedirectAttributes redirect) {
+		return "redirect:/admin/login";
+	}
+
+	@RequestMapping(value = "/registerWebUser", method = RequestMethod.POST)
+	public ModelAndView registerWebUserHandler(@Valid @ModelAttribute("webUsers") WebUsers webUsers,BindingResult bindingResult) {
+		getLogger().info("-------------registerWebUser---------------");
+		if(bindingResult.hasErrors()) {
+			return new ModelAndView("registration-form", "notValidParams", "");
+		}
+		WebUsersDTO dto = copyDtoInDomain(webUsers);
+		int id = webUsersService.createWebUserService(dto);		
+		Map<String, String> responseMap = new HashMap<String, String>();
+		if (id != 0) {
+			responseMap.put("response", "Successfully Registered");
+		} else {
+			responseMap.put("response", "failed");
+		}
+		return new ModelAndView("registration-success", responseMap);
+	}
+
+	private WebUsersDTO copyDtoInDomain(WebUsers webUsers) {
+		WebUsersDTO wuDto = new WebUsersDTO();
+		UserDetailDTO udDto = new UserDetailDTO();
+		BeanUtils.copyProperties(webUsers.getUserDetail(), udDto);		
+		BeanUtils.copyProperties(webUsers, wuDto);
+		wuDto.setUserDetailDTO(udDto);
+		List<RolesDTO> list = new ArrayList<RolesDTO>();
+		RolesDTO rDto = new RolesDTO();
+		BeanUtils.copyProperties(webUsers.getRoles().get(0), rDto);
+		list.add(rDto);
+		wuDto.setRolesDTO(list);
+		return wuDto;
+	}
+
+	@RequestMapping("/registrationForm")
+	public String registerationFormHandler() {
+		getLogger().info("--------------registration form--------------");
+		return "registration-form";
+	}
+
+	@RequestMapping(value = "/login",method=RequestMethod.GET)
+	public String getAdminLoginPage(ModelMap model,HttpSession session, RedirectAttributes redirect) {
+		getLogger().info("/login---------------------------------------------------");	
+		if(session.getAttribute("user")!=null) {
+			return "redirect:/admin/dashboard";
+		}
+		return "login";
+	}
+	
+	@RequestMapping(value = "/loginerror",method=RequestMethod.GET)
+	public String test(ModelMap model,HttpSession session, RedirectAttributes redirect) {
+		getLogger().info("/loginerror---------------------------------------------------");
+		model.addAttribute("error", "true");
+		return "login";
+	}
+	
+	@RequestMapping(value = "/profile")
+	public String viewProfile() {
+		return "profile";
+	}
+
+	@RequestMapping(value = "/profile", method = RequestMethod.POST)
+	public ModelAndView updateUser(@Valid @ModelAttribute("webUser") WebUsers webUser, BindingResult bindingResult,
+			HttpServletRequest request) throws Exception {
+		getLogger().info("------------------/profile--- update web user info ----------------------------------");
+		ModelAndView model = new ModelAndView();
+		model.setViewName("profile");
+		Map<String, String> map = isParamsValid(bindingResult, messageSource);
+		if (!map.get("response").equals("ok")) {			
+			model.addObject("update", "");
+			return model;
+		}
+		boolean result = webUsersService.updateWebUserService(webUser);
+		if (result) {
+			HttpSession session = request.getSession(false);
+			if (session.getAttribute("user") != null) {
+				session.removeAttribute("user");
+				WebUsersDTO userDTO = webUsersService.getWebUserByIdService(webUser.getWebUserId());
+				session.setAttribute("user", userDTO);
+			}
+			model.addObject("update", "true");
+			return model;
+		}
+		model.addObject("update", "");
+		return model;
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/changePassword", method = RequestMethod.POST)
+	public ResponseEntity<Map<String,String>> resetPasswordHanler(@Valid @RequestBody() ResetPasswordWeb resetPass,
+			BindingResult bindResult) {
+		getLogger().info("===/change password----------------------------------------------");
+		Map<String, String> bindResultMap = isParamsValid(bindResult, messageSource);
+		Map<String, String> responseMap = new HashMap<String, String>();
+		if (!bindResultMap.get("response").equals("ok")) {
+			responseMap.put("response", bindResultMap.get("response"));
+			return new ResponseEntity<Map<String,String>>(responseMap, HttpStatus.BAD_REQUEST);
+		} else if ((!resetPass.getNewPassword().equals(resetPass.getConfPassword()))) {			
+			responseMap.put("response", "passwords do not match");
+			return new ResponseEntity<Map<String,String>>(responseMap, HttpStatus.BAD_REQUEST);			
+		}		
+		int response = webUsersService.updatePasswordService(getWebUser(),resetPass.getNewPassword(),resetPass.getCurrentPassword());
+		if(response==ResponseCode.OLD_PASSWORD_DOES_NOT_MATCH) {
+			responseMap.put("response", "Current password do not match");
+			return new ResponseEntity<Map<String,String>>(responseMap, HttpStatus.BAD_REQUEST);
+		}		
+		responseMap.put("response", "password successfully updated");
+		return new ResponseEntity<Map<String,String>>(responseMap, HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/resetPassword", method = RequestMethod.POST)
+	public String resetPasswordHanler(@Valid @ModelAttribute("resetPass") ResetPasswordWeb resetPass,
+			BindingResult bindResult, @RequestParam("token") String token, ModelMap map,RedirectAttributes redirect) {
+		getLogger().info("/reset password post----------------------------------------------");
+		Map<String, String> bindResultMap = isParamsValid(bindResult, messageSource);		
+		if (!bindResultMap.get("response").equals("ok")) {
+			map.addAttribute("paramsNotValid", bindResultMap.get("response"));
+			return "reset-password";
+		} else if ((resetPass.getNewPassword().equals(resetPass.getConfPassword()))) {
+			map.addAttribute("paramsNotValid", "password do not match");
+		}
+		webUsersService.updatePasswordService(resetPass.getNewPassword(), token);
+		SecurityContextHolder.getContext().setAuthentication(null);
+		redirect.addFlashAttribute("resetPass","true");
+		return "redirect:/admin/login";
+	}
+	
+	
+	@RequestMapping(value="/logout", method = RequestMethod.GET)
+	public String logoutPage (ModelMap model, HttpServletRequest request, HttpServletResponse response,RedirectAttributes redirect) {
+		getLogger().info("----/logout------------------");
+	    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+	    
+	    if (auth != null){    
+	        new SecurityContextLogoutHandler().logout(request, response, auth);
+	    }
+	    redirect.addFlashAttribute("logout", true);
+	    return "redirect:/admin/login";//You can redirect wherever you want, but generally it's a good practice to show login screen again.
+	}
+	
+	@RequestMapping(value = "/sessionout")
+	public String sessionOutHandler(ModelMap model) {
+		getLogger().info("session out---------------------------------------------------");
+		model.addAttribute("sessionOut",true);		
+		return "session-out";
+	}
+	
+	@RequestMapping(value = "/sessionExpired")
+	public String handleSessionExpired(ModelMap map) {
+		getLogger().info("------sessionExpired----------------------");
+		map.addAttribute("sessionExp","true");
+		return "login";
+	}
+}

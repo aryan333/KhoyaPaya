@@ -1,0 +1,72 @@
+package com.saifintex.services;
+
+import java.util.List;
+import java.util.Map;
+
+import com.saifintex.domain.TotalBillAmount;
+import com.saifintex.domain.TransactionActionParams;
+import com.saifintex.domain.TransactionsFilterParams;
+import com.saifintex.dto.AssociatedUsersDTO;
+import com.saifintex.dto.ItemMasterDTO;
+import com.saifintex.dto.SalesPurchaseDetailDto;
+import com.saifintex.dto.TransactionSummaryParamsDto;
+import com.saifintex.dto.TransactionsDTO;
+import com.saifintex.web.domain.Transactions;
+import com.saifintex.web.dto.TransactionStatsDashboardDTO;
+import com.saifintex.web.dto.TransactionStatsReportDTO;
+import com.saifintex.web.dto.TransactionsRecordDto;
+
+public interface TransactionService {
+	
+	public TransactionsDTO insertTransaction(TransactionsDTO transaction);
+	
+	public TransactionsDTO acceptTransactionService(TransactionActionParams transactionActionParams);
+
+	public TransactionsDTO rejectTransaction(TransactionActionParams transactionActionParams);
+	
+	public List<TransactionsDTO> getTransactionHistory(int userId,int pageSize,String type);
+	
+	public TransactionsDTO getTransactionByPayIdWithUserInfo(int userId,long payId);
+
+	public List <TransactionsDTO> getPendingTransactions(int userId,int pageSize);
+
+	public List<AssociatedUsersDTO> getAssociatedUsers(int userId,int pageSize);
+	
+	public List<AssociatedUsersDTO> getAllAssociatedUsers(int userId);
+	
+	public List<TransactionsDTO> getLedger(int loggedInUserId,int oppositeUserId ,int pageSize);
+	
+	public List<AssociatedUsersDTO> getPayReceiveWithAssociatedUsersInfo(int userId,int pageSize);
+	
+	public Map<String,String> getTotalPayReceiveAmountWithPendingRequestsCount(int userId);
+	
+	public Map<String,String> calculateCashInOut(int userId);
+	
+	public List<AssociatedUsersDTO> recentUsersService(int userId,int pageSize);
+	
+	public List<ItemMasterDTO> fetchItem(int userId);
+
+	public List<TransactionsDTO> dateWiseTransactionServiceForInvoice(int userId,String date);
+	
+	public List<TotalBillAmount> monthWiseTransactionServiceForInvoice(int userId,String timePeriod);
+	
+	public List<TotalBillAmount> quarterWiseTransactionSrevice(int userId,String timePeriod);
+	
+	public List<com.saifintex.web.dto.TransactionsDTO> getAllTransactions(String txnType,int pageSize,int length,String search,com.saifintex.web.dto.TransactionsDTO transactionsWebDto);
+	
+	public TransactionsRecordDto getTransactionsRecord();
+	
+	public TransactionStatsDashboardDTO transactionStatsService();
+	
+	public TransactionSummaryParamsDto transactionSummary(int loggedInUserId,int opponentUserId );
+	
+	public List<TransactionsDTO> getTodayTransactions(int userId,int pageSize,String type);
+	
+	public List<TransactionsDTO> filterTransactions(TransactionsFilterParams params,int pageSize);
+	
+	public TransactionStatsReportDTO getTransactionsReportOfAllUsers(boolean includeTestUsers);
+	
+	public List<Transactions> getTransactionsListDashboard(boolean includeTestUsers,String paymentStatus,String period);
+	public List<com.saifintex.web.dto.TransactionsDTO> getUsersTransactions(int userId);
+	public SalesPurchaseDetailDto getSalesPurchaseAmount(int userId,String period);
+}

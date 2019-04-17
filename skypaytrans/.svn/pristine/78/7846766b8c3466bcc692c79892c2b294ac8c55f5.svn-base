@@ -1,0 +1,11 @@
+package com.saifintex.services;
+
+import com.saifintex.domain.ReminderNotificationParams;
+
+
+public interface UsersInvitationsDetailService {
+public boolean sendInvitation(ReminderNotificationParams reminderNotificationParams);
+public void sendFcmReminder(ReminderNotificationParams params);
+
+
+}

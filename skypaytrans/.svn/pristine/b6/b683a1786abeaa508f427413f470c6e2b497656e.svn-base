@@ -1,0 +1,10 @@
+package com.saifintex.dao.impl;
+
+import org.springframework.stereotype.Repository;
+
+import com.saifintex.dao.QRUniqueSeriesDAO;
+import com.saifintex.web.entity.QRUniqueSeriesEntity;
+@Repository
+public class QRUniqueSeriesDAOImpl extends BaseDAOImpl<QRUniqueSeriesEntity, Long> implements QRUniqueSeriesDAO {
+
+}

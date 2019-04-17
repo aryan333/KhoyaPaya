@@ -1,0 +1,440 @@
+package com.saifintex.controller.web;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.saifintex.common.AbstractBase;
+import com.saifintex.domain.User;
+import com.saifintex.domain.UserDetail;
+import com.saifintex.domain.UserOTP;
+import com.saifintex.domain.UsersTotalEarnedPoints;
+import com.saifintex.dto.AssociatedUsersDTO;
+import com.saifintex.dto.UserDTO;
+import com.saifintex.dto.UserDetailDTO;
+import com.saifintex.dto.UserOTPDTO;
+import com.saifintex.dto.UsersTotalEarnedPointsDTO;
+import com.saifintex.services.TransactionService;
+import com.saifintex.services.UserService;
+import com.saifintex.services.UsersOTPService;
+import com.saifintex.web.domain.LatLng;
+import com.saifintex.web.domain.UsersList;
+import com.saifintex.web.domain.UsersStatsDashboard;
+import com.saifintex.web.dto.LatLngDTO;
+import com.saifintex.web.dto.TransactionStatsDashboardDTO;
+import com.saifintex.web.dto.UsersListDTO;
+import com.saifintex.web.dto.UsersStatsDashboardDTO;
+
+@Controller
+@RequestMapping("/admin")
+public class BluPayUsersController extends AbstractBase {
+
+	@Autowired
+	UserService userService;
+	
+	@Autowired
+	private UsersOTPService userOtpService;
+
+	@Autowired
+	TransactionService transactionService;
+
+	@RequestMapping("/blupayUsers")
+	public ModelAndView getBluPayUsersPage(@RequestParam("flag") String flag, ModelAndView model) {
+		getLogger().info("====/blupayUsers============");
+		model.addObject("flag", flag);
+		UsersStatsDashboardDTO userStatsDto = userService.usersStatsService();
+		UsersStatsDashboard userStats = null;
+		if (userStatsDto != null) {
+			userStats = new UsersStatsDashboard();
+			BeanUtils.copyProperties(userStatsDto, userStats);
+		}
+		model.addObject("userStats", userStats);
+		model.setViewName("blupay-users");
+		return model;
+	}
+
+	@RequestMapping("/getAllBluPayUsers")
+	public @ResponseBody Map<String, List<User>> bluPayUsersHandler(@RequestParam("tod") String tod) {
+		getLogger().info("====/getAllBluPayUsers============");
+		List<UserDTO> listDto = null;
+		if (tod.startsWith("n")) {
+			listDto = userService.getAllBluPayUsersService();
+		} else {
+			listDto = userService.getNewBluPayUsersTodayService();
+		}
+		Map<String, List<User>> responseMap = new HashMap<String, List<User>>();
+		if (listDto == null) {
+			if (listDto == null) {
+				return ifDtoListNull(responseMap);
+			}
+		}
+		List<User> list = copyDtoListIntoDomainList(listDto);
+		responseMap.put("data", list);
+		return responseMap;
+
+	}
+
+	@RequestMapping("/getAllRegisteredBluPayUsers")
+	public @ResponseBody Map<String, List<User>> registeredBluPayUsersHandler() {
+		getLogger().info("=====/getAllRegisteredBluPayUsers====");
+		List<UserDTO> listDto = userService.getRegisteredBluPayUsersService();
+		Map<String, List<User>> responseMap = new HashMap<String, List<User>>();
+		if (listDto == null) {
+			return ifDtoListNull(responseMap);
+		}
+		List<User> list = copyDtoListIntoDomainList(listDto);
+		responseMap.put("data", list);
+		return responseMap;
+	}
+
+	@RequestMapping("/getAllTemporaryBluPayUsers")
+	public @ResponseBody Map<String, List<User>> UnregisteredBluPayUsersHandler() {
+		getLogger().info("=====/getAllTemporaryBluPayUsers====");
+		List<UserDTO> listDto = userService.getTemporaryBluPayUsersService();
+		Map<String, List<User>> responseMap = new HashMap<String, List<User>>();
+		if (listDto == null) {
+			return ifDtoListNull(responseMap);
+		}
+		List<User> list = copyDtoListIntoDomainList(listDto);
+		responseMap.put("data", list);
+		return responseMap;
+	}
+
+	@RequestMapping("/getRegisteredBluPayUsersToday")
+	public @ResponseBody Map<String, List<User>> newRegisteredBluPayUsersTodayHandler() {
+		getLogger().info("=====/getRegisteredBluPayUsersToday====");
+		List<UserDTO> listDto = userService.getNewRegisteredBluPayUsersTodayService();
+		Map<String, List<User>> responseMap = new HashMap<String, List<User>>();
+		if (listDto == null) {
+			return ifDtoListNull(responseMap);
+		}
+		List<User> list = copyDtoListIntoDomainList(listDto);
+		responseMap.put("data", list);
+		return responseMap;
+	}
+
+	@RequestMapping("/getTemporaryBluPayUsersToday")
+	public @ResponseBody Map<String, List<User>> newTemporaryBluPayUsersTodayHandler() {
+		getLogger().info("=====/getTemporaryBluPayUsersToday====");
+		List<UserDTO> listDto = userService.getNewTemporaryBluPayUsersTodayService();
+		Map<String, List<User>> responseMap = new HashMap<String, List<User>>();
+		if (listDto == null) {
+			return ifDtoListNull(responseMap);
+		}
+		List<User> list = copyDtoListIntoDomainList(listDto);
+		responseMap.put("data", list);
+		return responseMap;
+	}
+
+	@RequestMapping("/getAllBluPayUsers/{startDate}/{endDate}/{flag}")
+	public @ResponseBody Map<String, Object> getBluPayUsersBetweenTwoDatesHandler(@PathVariable String startDate,
+			@PathVariable String endDate, @PathVariable String flag) {
+		getLogger().info("=====/getAllBluPayUsers/" + startDate + "/" + endDate + "/" + flag);
+		List<UserDTO> listDto = userService.getUsersBetweenDateRangeService(startDate, endDate, flag);
+		Map<String, Object> responseMap = new HashMap<String, Object>();
+		if (listDto == null) {
+			responseMap.put("data", null);
+			return responseMap;
+		}
+		UsersStatsDashboardDTO dto = userService.getUserStatsBetweenDateRangeService(startDate, endDate);
+		List<User> list = copyDtoListIntoDomainList(listDto);
+		responseMap.put("data", list);
+		responseMap.put("userStats", dto);
+		return responseMap;
+	}
+
+	@RequestMapping("/getCurrentWeekUsers")
+	public @ResponseBody Map<String, List<User>> getCurrentWeekUsersHandler() {
+		getLogger().info("=====/getCurrentWeekUsers/");
+		List<UserDTO> listDto = userService.getUsersInCurrWeekService();
+		Map<String, List<User>> responseMap = new HashMap<String, List<User>>();
+		if (listDto == null) {
+			return ifDtoListNull(responseMap);
+		}
+		List<User> list = copyDtoListIntoDomainList(listDto);
+		responseMap.put("data", list);
+		return responseMap;
+	}
+
+	@RequestMapping("/getCurrentWeekTempUsers")
+	public @ResponseBody Map<String, List<User>> getCurrentWeekTempUsersHandler() {
+		getLogger().info("=====/getCurrentWeekUsers/");
+		List<UserDTO> listDto = userService.getTemporaryUsersInCurrWeekService();
+		Map<String, List<User>> responseMap = new HashMap<String, List<User>>();
+		if (listDto == null) {
+			return ifDtoListNull(responseMap);
+		}
+		List<User> list = copyDtoListIntoDomainList(listDto);
+		responseMap.put("data", list);
+		return responseMap;
+	}
+
+	@RequestMapping("/getCurrentWeekRegUsers")
+	public @ResponseBody Map<String, List<User>> getCurrentWeekRegUsersHandler() {
+		getLogger().info("=====/getCurrentWeekUsers/");
+		List<UserDTO> listDto = userService.getRegisteredUsersInCurrWeekService();
+		Map<String, List<User>> responseMap = new HashMap<String, List<User>>();
+		if (listDto == null) {
+			return ifDtoListNull(responseMap);
+		}
+		List<User> list = copyDtoListIntoDomainList(listDto);
+		responseMap.put("data", list);
+		return responseMap;
+	}
+
+	@RequestMapping("/getCurrentMonthUsers")
+	public @ResponseBody Map<String, List<User>> getCurrentMonthUsersHandler() {
+		getLogger().info("=====/getCurrentWeekUsers/");
+		List<UserDTO> listDto = userService.getUsersInCurrMonthService();
+		Map<String, List<User>> responseMap = new HashMap<String, List<User>>();
+		if (listDto == null) {
+			return ifDtoListNull(responseMap);
+		}
+		List<User> list = copyDtoListIntoDomainList(listDto);
+		responseMap.put("data", list);
+		return responseMap;
+	}
+
+	@RequestMapping("/getCurrentMonthRegUsers")
+	public @ResponseBody Map<String, List<User>> getCurrentMonthRegUsersHandler() {
+		getLogger().info("=====/getCurrentWeekUsers/");
+		List<UserDTO> listDto = userService.getRegUsersInCurrMonthService();
+		Map<String, List<User>> responseMap = new HashMap<String, List<User>>();
+		if (listDto == null) {
+			return ifDtoListNull(responseMap);
+		}
+		List<User> list = copyDtoListIntoDomainList(listDto);
+		responseMap.put("data", list);
+		return responseMap;
+	}
+
+	@RequestMapping("/getCurrentMonthTempUsers")
+	public @ResponseBody Map<String, List<User>> getCurrentMonthTempUsersHandler() {
+		getLogger().info("=====/getCurrentWeekUsers/");
+		List<UserDTO> listDto = userService.getTempUsersInCurrMonthService();
+		Map<String, List<User>> responseMap = new HashMap<String, List<User>>();
+		if (listDto == null) {
+			return ifDtoListNull(responseMap);
+		}
+		List<User> list = copyDtoListIntoDomainList(listDto);
+		responseMap.put("data", list);
+		return responseMap;
+	}
+
+	/**
+	 * @param period -- today for current date, yest for yesterday,week for week range
+	 *            and start is from starting date
+	 * @param testUser - true or false. whether to include test users or not           
+	 * @return list of active users(UsersList) who have transacted and responded as well.
+	 */
+	
+	@RequestMapping("/getActiveUsers/{period}")
+	public @ResponseBody Map<String, List<UsersList>> getActiveUsers(@PathVariable("period") String period,@RequestParam("testUser") boolean testUser) {
+		getLogger().info("=====/getActiveUsers/" + period + " == "+testUser);
+		List<UsersListDTO> dtoList = userService.getActiveUsersList(period,testUser);
+		Map<String, List<UsersList>> responseMap = new HashMap<String, List<UsersList>>();
+		List<UsersList> userList = new ArrayList<UsersList>();
+		if (dtoList != null && !dtoList.isEmpty()) {
+			for (UsersListDTO dto : dtoList) {
+				UsersList user = new UsersList();
+				BeanUtils.copyProperties(dto, user);
+				userList.add(user);
+			}
+		}
+		responseMap.put("data", userList);
+		return responseMap;
+	}
+
+	/**
+	 * @param period 4 possible values :- today , yest, week,start and all
+	 * @param testUser possible values :- true or false
+	 * @return list of objects of UsersList domain
+	 */
+	@RequestMapping("/getInactiveUsers/{period}")
+	public @ResponseBody Map<String, List<UsersList>> getInactiveUsers(@PathVariable("period") String period,@RequestParam("testUser") boolean testUser) {
+		getLogger().info("=====/getInActiveUsers/" + period + " == "+testUser);
+		List<UsersListDTO> dtoList = userService.getBlockedUsers(testUser, period);
+		Map<String, List<UsersList>> responseMap = new HashMap<String, List<UsersList>>();
+		List<UsersList> userList = new ArrayList<UsersList>();
+		if (dtoList != null && !dtoList.isEmpty()) {
+			for (UsersListDTO dto : dtoList) {
+				UsersList user = new UsersList();
+				BeanUtils.copyProperties(dto, user);
+				userList.add(user);
+			}
+		}	
+		
+		responseMap.put("data", userList);
+		return responseMap;
+	}
+	
+	/**
+	 * @param period 4 possible values :- today , yest, week,start and all
+	 * @param testUser possible values :- true or false
+	 * @return list of objects of UsersList domain
+	 */
+	@RequestMapping("/getOnBoardedUsers/{period}")
+	public @ResponseBody Map<String, List<UsersList>> registeredUsersHandler(@PathVariable("period") String period,@RequestParam("testUser") boolean testUser) {
+		getLogger().info("=====/getOnBoardedUsers/" + period + " == "+testUser);
+		List<UsersListDTO> dtoList = userService.getOnBoardedUsersService(period,testUser);
+		Map<String, List<UsersList>> responseMap = new HashMap<String, List<UsersList>>();
+		List<UsersList> userList = new ArrayList<UsersList>();
+		if (dtoList != null && !dtoList.isEmpty()) {
+			for (UsersListDTO dto : dtoList) {				
+				UsersList user = new UsersList();
+				BeanUtils.copyProperties(dto, user);
+				userList.add(user);
+			}
+		}
+		responseMap.put("data", userList);
+		return responseMap;
+	}
+
+	
+	private List<User> copyDtoListIntoDomainList(List<UserDTO> listDto) {
+		List<User> list = new ArrayList<User>();
+		for (UserDTO dto : listDto) {
+			UserDetailDTO udDto = dto.getUserDetailDTO();
+			UsersTotalEarnedPointsDTO earnedPointsDTO = dto.getUsersTotalEarnedPointsDTO();
+			UsersTotalEarnedPoints points = new UsersTotalEarnedPoints();
+			BeanUtils.copyProperties(earnedPointsDTO, points);
+			User user = new User();
+			UserDetail userDetail = new UserDetail();
+			BeanUtils.copyProperties(udDto, userDetail);
+			BeanUtils.copyProperties(dto, user);
+			
+			user.setUserDetail(userDetail);
+			user.setUsersTotalEarnedPoints(points);
+			list.add(user);
+		}
+		return list;
+	}
+
+	private Map<String, List<User>> ifDtoListNull(Map<String, List<User>> responseMap) {
+		responseMap.put("data", null);
+		return responseMap;
+	}
+
+	@RequestMapping("/findUser")
+	public ModelAndView getSearchUserPage(ModelAndView model) {
+		getLogger().info("====/blupayUsers============");
+		// model.addObject("flag",flag);
+		model.setViewName("find-user");
+	
+		
+		return model;
+	}
+	
+	@RequestMapping("/findUserWithMob")
+	public ModelAndView getFindUserPageWithMob(@RequestParam("mob") String mob,ModelAndView model) {
+		getLogger().info("====/blupayUsers============");
+		// model.addObject("flag",flag);
+		model.setViewName("find-user");
+		model.addObject("mob",mob.trim());
+		
+		return model;
+	}
+
+	@ResponseBody
+	@RequestMapping("/findUser/{mobile}")
+	public Map<String, Object> getUserInfoHandler(@PathVariable("mobile") String mob) {
+		getLogger().info("-----------/findUser/mobile-----------");
+		getLogger().info("mobile == " + mob);
+		UserDTO userDto = userService.getOnlyUserInfoByLogin(mob);
+		Map<String, Object> responseMap = new HashMap<String, Object>();
+		if (userDto == null) {
+			responseMap.put("userInfo", null);
+			return responseMap;
+		}
+		responseMap.put("userInfo", userDto);
+		TransactionStatsDashboardDTO dto = userService.getSpecificUserTransStats(userDto.getId());
+		List<AssociatedUsersDTO> associatedUsersDTOs = transactionService.getAllAssociatedUsers(userDto.getId());
+		responseMap.put("transInfo", dto);
+		responseMap.put("data", associatedUsersDTOs);
+		return responseMap;
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/deactivateUser", method = RequestMethod.POST)
+	public String userDeactivationHandler(@RequestParam("phone") String phone, @RequestParam("action") String action) {
+		getLogger().info("-----------/deactivateUser-----------");
+		getLogger().info("phone to deactivate == " + phone);
+		userService.deactivateUserService(phone, action);
+		return "success";
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/activateUser", method = RequestMethod.POST)
+	public String userActivationHandler(@RequestParam("phone") String phone,
+			@RequestParam("field") String fieldToUpdate) {
+		getLogger().info("-----------/activateUser-----------");
+		userService.activateUserService(phone, fieldToUpdate);
+		return "success";
+	}
+	
+	
+	@RequestMapping(value = "/getOnBoardedUsersLatLng", method = RequestMethod.GET)
+	public @ResponseBody ResponseEntity<List<LatLng>> latLngHandler() {
+		getLogger().info("========/getOnBoardedUsersLatLng=========");
+		List<LatLngDTO> list = userService.getOnBoardedUsersLatLng();
+		List<LatLng> responseList = null;
+		if(list!=null && !list.isEmpty()) {
+			responseList = new ArrayList<LatLng>();
+			for(LatLngDTO dto:list) {
+				LatLng latLng = new LatLng();
+				BeanUtils.copyProperties(dto, latLng);
+				responseList.add(latLng);
+			}
+		}
+		return new ResponseEntity<List<LatLng>>(responseList, HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/map", method = RequestMethod.GET)
+	public String getMap() {
+		getLogger().info("-----------/map-----------");		
+		return "map";
+	}
+	
+	
+	@RequestMapping(value = "/userOtp", method = RequestMethod.GET)
+	public String userOtpHandler() {
+		getLogger().info("-----------/UserOTP-----------");		
+		return "userotp";
+	}
+	
+	
+	@RequestMapping(value = "/getUserOtp/{mobileNumber}", method = RequestMethod.GET)
+	public @ResponseBody ResponseEntity<?> getUserOtp(@PathVariable("mobileNumber") String mobileNumber) {
+		getLogger().info("-----------/UserOTPByMobileNumber-----------");		
+		UserOTPDTO dto=userOtpService.getUserOtpByMobileNumber(mobileNumber);
+		Map<String,UserOTP> responseMap=new HashMap<String,UserOTP>();
+		
+		if(dto==null) {
+			responseMap.put("userInfo", null);
+			return new ResponseEntity<Map<String,UserOTP>> (responseMap,HttpStatus.OK);
+		}
+		
+		UserOTP userOtp=new UserOTP();
+		
+		BeanUtils.copyProperties(dto, userOtp);
+		responseMap.put("userInfo", userOtp);
+		return new ResponseEntity<Map<String,UserOTP>> (responseMap,HttpStatus.OK);
+	}
+	
+	
+	
+
+}

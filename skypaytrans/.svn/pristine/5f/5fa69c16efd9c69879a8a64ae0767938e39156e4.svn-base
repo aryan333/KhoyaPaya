@@ -1,0 +1,44 @@
+bluPay = new function() {
+	var $instance = this;
+	this.init = function(flag) {
+		
+				
+		$.ajaxPrefilter(function(options, originalOptions, jqXHR) {
+			var token = $('input[name="_csrf"]').attr('value');
+			      return jqXHR.setRequestHeader('X-CSRF-Token', token);			   
+			});
+		
+		
+		var messageTextArea = $("#form_message");
+		
+		var sendBtn = $("#sendButton").click(function() {
+			if (messageTextArea.val().length == 0) {
+				alert("Please enter a message to send");
+			} else {
+				$.ajax({
+					type : "POST",
+					url : "../admin/notifyAll",
+					dataType : "text",
+					async : false,
+					data : {
+						'message' : messageTextArea.val()						
+					},
+					success : function(data) {
+						Success = true;// doesnt goes here
+						alert(data);
+					},
+					error: function (xhr, httpStatusMessage, customErrorMessage) {
+	                    if (xhr.status === 400) {
+	                    	document.location.href="sessionout";
+	                      
+	                    }
+	                   }
+
+				});
+
+			}
+
+		});
+	}
+
+}

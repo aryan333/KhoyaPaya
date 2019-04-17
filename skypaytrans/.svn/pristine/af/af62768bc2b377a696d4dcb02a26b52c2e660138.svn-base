@@ -1,0 +1,62 @@
+package com.saifintex.web.dto;
+
+public class SalesPersonReferalInfoDTO {
+	private String salesPersonName;
+	private String salesPersonMobileNumber;
+	private String slaesPersonInviteCode;
+	
+	private long totalCount;
+	private long currentDateCount;
+	private long yesterdayDateCount;
+	private long weekCount;
+	private long uptoDateCount;
+	
+	public String getSlaesPersonInviteCode() {
+		return slaesPersonInviteCode;
+	}
+	public void setSlaesPersonInviteCode(String slaesPersonInviteCode) {
+		this.slaesPersonInviteCode = slaesPersonInviteCode;
+	}
+	public String getSalesPersonName() {
+		return salesPersonName;
+	}
+	public void setSalesPersonName(String salesPersonName) {
+		this.salesPersonName = salesPersonName;
+	}
+	public String getSalesPersonMobileNumber() {
+		return salesPersonMobileNumber;
+	}
+	public void setSalesPersonMobileNumber(String salesPersonMobileNumber) {
+		this.salesPersonMobileNumber = salesPersonMobileNumber;
+	}
+	public long getTotalCount() {
+		return totalCount;
+	}
+	public void setTotalCount(long totalCount) {
+		this.totalCount = totalCount;
+	}
+	public long getCurrentDateCount() {
+		return currentDateCount;
+	}
+	public void setCurrentDateCount(long currentDateCount) {
+		this.currentDateCount = currentDateCount;
+	}
+	public long getYesterdayDateCount() {
+		return yesterdayDateCount;
+	}
+	public void setYesterdayDateCount(long yesterdayDateCount) {
+		this.yesterdayDateCount = yesterdayDateCount;
+	}
+	public long getWeekCount() {
+		return weekCount;
+	}
+	public void setWeekCount(long weekCount) {
+		this.weekCount = weekCount;
+	}
+	public long getUptoDateCount() {
+		return uptoDateCount;
+	}
+	public void setUptoDateCount(long uptoDateCount) {
+		this.uptoDateCount = uptoDateCount;
+	}
+}

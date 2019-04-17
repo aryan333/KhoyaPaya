@@ -1,0 +1,147 @@
+package com.saifintex.controller.web;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.mysql.fabric.xmlrpc.base.Data;
+import com.saifintex.common.AbstractBase;
+import com.saifintex.domain.Roles;
+import com.saifintex.services.UserService;
+import com.saifintex.web.domain.LatLng;
+import com.saifintex.web.domain.UsersList;
+import com.saifintex.web.dto.LatLngDTO;
+import com.saifintex.web.dto.SalesPersonReferalInfoDTO;
+import com.saifintex.web.dto.TotalReferalUserBySPDTO;
+import com.saifintex.web.dto.UsersListDTO;
+
+@Controller
+@RequestMapping("/admin")
+
+public class SalesManController extends AbstractBase {
+	
+	@Autowired
+	UserService userService;
+	
+	@RequestMapping(value = "/salesInfo")
+	public ModelAndView viewMasterTable() {
+		
+		ModelAndView model = new ModelAndView("salesInfo");
+		
+	List<SalesPersonReferalInfoDTO> salesInfodto=userService.SalesPersonReferalInfo();
+	TotalReferalUserBySPDTO  totalReferalUserBySPDTO=userService.getTotalUsersBySP();
+	
+	System.out.println(totalReferalUserBySPDTO.getOverAllTotalCount());
+		
+	for(SalesPersonReferalInfoDTO dto:salesInfodto) {
+		System.out.println(dto.getSalesPersonName());
+	}
+		
+		
+		return new ModelAndView("salesInfo")/* .addObject("userStats", report).addObject("transStats", transStats) */
+				.addObject("dateParams", getDashboardDateParamsInDDMMYYYYFormat()).addObject("salesRefDetails",salesInfodto).addObject("totaluser", totalReferalUserBySPDTO);
+	}
+	
+	@RequestMapping(value="/getReferalUsers/{period}")
+	public @ResponseBody Map<String, List<UsersList>> referalUsersHandler(@PathVariable("period") String period,@RequestParam("inviteCode") String inviteCode,@RequestParam("userType") String userType) {
+		getLogger().info("=====/getReferalUsers/" + period + " == "+inviteCode+"  =="+userType);
+		List<UsersListDTO> dtoList = userService.getReferalUsersService(period,inviteCode,userType);
+		Map<String, List<UsersList>> responseMap = new HashMap<String, List<UsersList>>();
+		List<UsersList> userList = new ArrayList<UsersList>();
+		if (dtoList != null && !dtoList.isEmpty()) {
+			for (UsersListDTO dto : dtoList) {				
+				UsersList user = new UsersList();
+				BeanUtils.copyProperties(dto, user);
+				userList.add(user);
+			}
+		}
+		responseMap.put("data", userList);
+		return responseMap;
+	}
+	
+	
+	@RequestMapping(value="/getAllBySPReferalUsers/{period}")
+	public @ResponseBody Map<String, List<UsersList>> allBySPreferalUsersHandler(@PathVariable("period") String period, @RequestParam("userType") String userType) {
+		getLogger().info("=====/getReferalUsers/" + period + " == "+userType);
+		List<UsersListDTO> dtoList = userService.getAllBySPReferalUsersService(period,userType);
+		Map<String, List<UsersList>> responseMap = new HashMap<String, List<UsersList>>();
+		List<UsersList> userList = new ArrayList<UsersList>();
+		if (dtoList != null && !dtoList.isEmpty()) {
+			for (UsersListDTO dto : dtoList) {				
+				UsersList user = new UsersList();
+				BeanUtils.copyProperties(dto, user);
+				userList.add(user);
+			}
+		}
+		responseMap.put("data", userList);
+		
+		return responseMap;
+	}
+	
+	
+
+	@RequestMapping(value = "/getAllRegisteredUserBySPLatLng", method = RequestMethod.GET)
+	public @ResponseBody ResponseEntity<List<LatLng>> latLngHandler() {
+		getLogger().info("========/getAllRegisteredUserBySPLatLng=========");
+		List<LatLngDTO> list = userService.getAllRegisteredUserBySPLatLng();
+		List<LatLng> responseList = null;
+		if(list!=null && !list.isEmpty()) {
+			responseList = new ArrayList<LatLng>();
+			for(LatLngDTO dto:list) {
+				LatLng latLng = new LatLng();
+				BeanUtils.copyProperties(dto, latLng);
+				responseList.add(latLng);
+			}
+		}
+		
+		return new ResponseEntity<List<LatLng>>(responseList, HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/registeredreferaluserbyspmap", method = RequestMethod.GET)
+	public String getMap() {
+		getLogger().info("-----------/registeredreferaluserbyspmap-----------");		
+		return "registeredreferaluserbyspmap";
+	}
+	
+	@RequestMapping(value = "/indivualreferaluserbyspmap/{period}", method = RequestMethod.GET)
+	public ModelAndView indivualReferalUserBySpMapHandler(@PathVariable("period") String period,@RequestParam("inviteCode") String inviteCode,@RequestParam("userType") String userType) {
+		getLogger().info("=====/getReferalUsers/" + period + " == "+inviteCode+"  =="+userType);
+		return new ModelAndView("indivualreferaluserbyspmap").addObject("inviteCode", inviteCode)
+				.addObject("userType",userType)
+				.addObject("period",period);
+	
+
+}
+	
+	@RequestMapping(value = "/getIndivualreferaluserbyspmap/{period}", method = RequestMethod.GET)
+	public @ResponseBody ResponseEntity<?> ReferalUsersHandler(@PathVariable("period") String period,@RequestParam("inviteCode") String inviteCode,@RequestParam("userType") String userType) {
+		getLogger().info("=====/getIndivualreferaluserbyspmap/" + period + " == "+inviteCode+"  =="+userType);
+		List<UsersListDTO> dtoList = userService.getReferalUsersLatLngService(period,inviteCode,userType);
+		Map<String, List<UsersList>> responseMap = new HashMap<String, List<UsersList>>();
+		List<UsersList> userList = new ArrayList<UsersList>();
+		if (dtoList != null && !dtoList.isEmpty()) {
+			for (UsersListDTO dto : dtoList) {				
+				UsersList user = new UsersList();
+				BeanUtils.copyProperties(dto, user);
+				userList.add(user);
+			}
+		}
+		
+		return new ResponseEntity<List<UsersList>>(userList,HttpStatus.OK);
+	
+
+}
+}

@@ -1,0 +1,51 @@
+package com.saifintex.utils;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+@Component
+public final class ApplicationProperties {
+@Value("${app.transaction.notify.insert.amount}")
+private String transStoreTotalAmountNotify;
+
+@Value("${app.transaction.notify.insert.billamount}")
+private String transStoreBillAmountNotify;
+
+@Value("${app.transaction.notify.accept.amount}")
+private String acceptWithTotalAmount;
+
+@Value("${app.transaction.notify.accept.billamount}")
+private String acceptWithBillAmount;
+
+@Value("${app.transaction.notify.reject.amount}")
+private String rejectWithTotalAmount;
+
+@Value("${app.transaction.notify.reject.billamount}")
+private String rejectWithBillAmount;
+
+public String getTransStoreTotalAmountNotify() {
+	return transStoreTotalAmountNotify;
+}
+
+public String getTransStoreBillAmountNotify() {
+	return transStoreBillAmountNotify;
+}
+
+public String getAcceptWithTotalAmount() {
+	return acceptWithTotalAmount;
+}
+
+public String getAcceptWithBillAmount() {
+	return acceptWithBillAmount;
+}
+
+public String getRejectWithTotalAmount() {
+	return rejectWithTotalAmount;
+}
+
+public String getRejectWithBillAmount() {
+	return rejectWithBillAmount;
+}
+
+
+}

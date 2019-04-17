@@ -1,0 +1,82 @@
+@CHARSET "ISO-8859-1";
+body{
+	margin:0;
+	padding: 0;
+	
+}
+*{
+	box-sizing: border-box;
+}
+div{
+	float:left;
+}
+.ezkhata_header_agreement{
+	
+	padding: 0px 7px 0px 7px;
+	
+}
+ol{
+	margin: 0;
+	font-size: 14px;
+}
+.ezkhata_header_agreement_head{
+	
+	
+	float:none;
+}
+.ezkhata_agreement_acceptance{
+	
+	text-align: justify;
+}
+.ezkhata_agreement_serv_desc{
+	
+	text-align: justify;
+}
+.ezkhata_agreement_termination{
+	
+	text-align: justify;
+}
+
+.ezkhata_agreement_services{
+	
+	text-align: justify;
+}
+.ezkhata_agreement_reso{
+	
+	text-align: justify;
+}
+.ezkhata_agreement_general{
+	
+	text-align: justify;
+}
+ul{
+	margin: 0px;
+	padding-left: 18px;
+    
+}
+dt{
+	font-size: large;
+	font-weight:bold; 
+	text-align: center;
+}
+.ezkhata_header_footer{
+	
+	text-align: center;
+	width: 100%;
+}
+.ezkhata_header_footer h1{
+	text-align: center;
+	padding-top: 10px;
+    font-size: 12px;
+    color: green;
+}
+h1{
+	
+    padding: 0;
+    margin: 0;
+    font-weight: 600;
+    font-size: 20px;
+}
+.draft_color{
+	color: red;
+}

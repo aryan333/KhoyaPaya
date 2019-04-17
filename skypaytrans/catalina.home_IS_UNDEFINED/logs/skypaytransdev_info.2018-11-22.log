@@ -1,0 +1,26 @@
+2018-11-22 10:48:21 INFO  c.s.c.web.WebUsersController - /login--------------------------------------------------- 
+2018-11-22 14:38:37 INFO  c.s.c.web.WebUsersController - /login--------------------------------------------------- 
+2018-11-22 14:38:42 INFO  c.s.c.web.DashboardController - =========/dashboard=========== 
+2018-11-22 14:38:44 INFO  c.s.c.web.DashboardController - ---------/getRemainingOTPs/---------------------- 
+2018-11-22 14:38:44 INFO  c.s.c.web.DashboardController - =========/dashboardrest=========== 
+2018-11-22 15:46:36 INFO  c.s.c.web.WebUsersController - session out--------------------------------------------------- 
+2018-11-22 15:46:39 INFO  c.s.c.web.WebUsersController - /login--------------------------------------------------- 
+2018-11-22 15:46:41 INFO  c.s.c.web.DashboardController - =========/dashboard=========== 
+2018-11-22 15:46:42 INFO  c.s.c.web.DashboardController - =========/dashboardrest=========== 
+2018-11-22 15:46:42 INFO  c.s.c.web.DashboardController - ---------/getRemainingOTPs/---------------------- 
+2018-11-22 15:46:43 INFO  c.s.c.web.BluPayUsersController - =====/getOnBoardedUsers/all == true 
+2018-11-22 15:46:59 INFO  c.s.c.web.BluPayUsersController - ====/blupayUsers============ 
+2018-11-22 15:47:00 INFO  c.s.c.web.DashboardController - ---------/getRemainingOTPs/---------------------- 
+2018-11-22 15:47:00 INFO  c.s.c.web.BluPayUsersController - ====/getAllBluPayUsers============ 
+2018-11-22 15:47:55 INFO  c.s.c.web.BluPayUsersController - ====/blupayUsers============ 
+2018-11-22 15:47:57 INFO  c.s.c.web.DashboardController - ---------/getRemainingOTPs/---------------------- 
+2018-11-22 15:47:58 INFO  c.s.c.web.BluPayUsersController - ====/blupayUsers============ 
+2018-11-22 15:47:59 INFO  c.s.c.web.DashboardController - ---------/getRemainingOTPs/---------------------- 
+2018-11-22 15:47:59 INFO  c.s.c.web.BluPayUsersController - ====/getAllBluPayUsers============ 
+2018-11-22 15:48:14 INFO  c.s.c.web.BluPayUsersController - ====/getAllBluPayUsers============ 
+2018-11-22 15:51:02 INFO  c.s.c.web.BluPayUsersController - =====/getAllRegisteredBluPayUsers==== 
+2018-11-22 16:33:38 INFO  c.s.c.web.WebUsersController - session out--------------------------------------------------- 
+2018-11-22 16:33:41 INFO  c.s.c.web.WebUsersController - /login--------------------------------------------------- 
+2018-11-22 16:33:43 INFO  c.s.c.web.DashboardController - =========/dashboard=========== 
+2018-11-22 16:33:44 INFO  c.s.c.web.DashboardController - ---------/getRemainingOTPs/---------------------- 
+2018-11-22 16:33:44 INFO  c.s.c.web.DashboardController - =========/dashboardrest=========== 

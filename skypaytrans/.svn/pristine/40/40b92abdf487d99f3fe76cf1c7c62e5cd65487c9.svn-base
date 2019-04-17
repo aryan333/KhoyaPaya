@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<%@page import="com.saifintex.web.domain.UsersStatsDashboard"%>
+<%@page import="com.saifintex.web.dto.UsersStatsDashboardDTO"%>
+<html lang="en">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="">
+<meta name="author" content="">
+
+<title>Ezkhata Users</title>
+<link rel="icon" href="../resources/images/favicon.ico"
+	type="image/x-icon">
+<!-- Bootstrap Core CSS -->
+<link href="../resources/vendor/bootstrap/css/bootstrap.min.css"
+	rel="stylesheet">
+
+<!-- MetisMenu CSS -->
+<link href="../resources/vendor/metisMenu/metisMenu.min.css"
+	rel="stylesheet">
+
+<!-- DataTables CSS -->
+<link
+	href="../resources/vendor/datatables-plugins/dataTables.bootstrap.css"
+	rel="stylesheet">
+
+<!-- DataTables Responsive CSS -->
+<link
+	href="../resources/vendor/datatables-responsive/dataTables.responsive.css"
+	rel="stylesheet">
+
+<!-- Custom CSS -->
+<link href="../resources/dist/css/sb-admin-2.css" rel="stylesheet">
+<link href="../resources/dist/css/sb-admin-2.css" rel="stylesheet">
+<link href="../resources/dist/css/blupay-users.css" rel="stylesheet">
+
+<!-- date picker css -->
+<link
+	href="https://code.jquery.com/ui/1.10.4/themes/ui-lightness/jquery-ui.css"
+	rel="stylesheet">
+<!-- Custom Fonts -->
+<!-- <link href="../resources/vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+
+<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+
+	<div id="wrapper">
+		<jsp:include page="header-nav.jsp"></jsp:include>
+		<input type="hidden" id="flag" value=${flag}>
+
+		<div id="page-wrapper">
+			<div class="row">
+				<div class="col-lg-12">
+					<h1 class="page-header">Ezkhata Users</h1>
+				</div>
+				<!-- /.col-lg-12 -->
+			</div>
+			<div class="row">
+				<div class="col-lg-12">
+					<div class="panel panel-default">
+						<div class="panel-heading">Ezkhata Users Statistics</div>
+						<!-- /.panel-heading -->
+						<div class="panel-body">
+							<div class="table-responsive">
+								<table class="table table-striped table-bordered table-hover">
+									<thead>
+										<tr>
+											<th>Total Users</th>
+											<th>Total Registered Users</th>
+											<th>Total Unregistered Guests</th>
+											<th>New Registered Users Today</th>
+											<th>New Unregistered Guests Today</th>
+											<th>New Registered Users This Week</th>
+											<th>New Unregistered Guests This Week</th>
+											<th>New Registered Users This Month</th>
+											<th>New Unregistered Guests This Month</th>
+										</tr>
+									</thead>									
+									<tbody>
+										<tr>
+											<td class="text-center"><button id="totalUsersButton"
+													type="button" class="btn btn-default">${userStats.totalUsers}</button></td>
+											<td class="text-center"><button
+													id="totalRegisteredButton" type="button"
+													class="btn btn-default">${userStats.totalPermanentUsers}</button></td>
+											<td class="text-center"><button
+													id="totalUnregisteredButton" type="button"
+													class="btn btn-default">${userStats.totalTemporaryUsers}</button></td>
+											<td class="text-center"><button
+													id="totalNewRegisteredButton" type="button"
+													class="btn btn-default">${userStats.newRegisteredUsersToday}</button></td>
+											<td class="text-center"><button
+													id="totalNewUnregisteredButton" type="button"
+													class="btn btn-default">${userStats.newTemporaryUsersToday}</button></td>
+											<td class="text-center"><button
+													id="totalNewRegisteredWeekButton" type="button"
+													class="btn btn-default">${userStats.newRegisteredUsersWeek}</button></td>
+											<td class="text-center"><button
+													id="totalNewUnregisteredWeekButton" type="button"
+													class="btn btn-default">${userStats.newTemporaryUsersWeek}</button></td>
+											<td class="text-center"><button
+													id="totalNewRegisteredMonthButton" type="button"
+													class="btn btn-default">${userStats.newRegisteredUsersMonth}</button></td>
+											<td class="text-center"><button
+													id="totalNewUnregisteredMonthButton" type="button"
+													class="btn btn-default">${userStats.newUnregisteredUsersMonth}</button></td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+							<!-- /.table-responsive -->
+						</div>
+						<!-- /.panel-body -->
+					</div>
+					<!-- /.panel -->
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-lg-12">
+					<div class="panel panel-default">
+						<div class="panel-heading" id="dateRangeHeadingDiv">Date
+							Range Selection</div>
+						<!-- /.panel-heading -->
+						<div class="form-group">
+							<br>
+							<p class="text-center">
+								<label class="text-left">Start Date</label> : <input
+									name="startdatepicker" type="text" id="startdatepicker">
+								<label class="text-right">End Date</label> : <input
+									name="enddatepicker" type="text" id="enddatepicker">
+								<button type="reset" class="btn btn-primary" id="findUsersBtn">Find
+									Users</button>
+							</p>
+							<br>
+							<div class="table-responsive" id="dateRangeUsersCountDiv">
+								<table class="table table-striped table-bordered table-hover">
+									<thead>
+										<tr>
+											<th>Total Users</th>
+											<th>Total Registered Users</th>
+											<th>Total Unregistered Guests</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td class="text-center"><button id="totalUsersDRButton"
+													type="button" class="btn btn-default"></button></td>
+											<td class="text-center"><button
+													id="totalRegisteredDRButton" type="button"
+													class="btn btn-default"></button></td>
+											<td class="text-center"><button
+													id="totalUnregisteredDRButton" type="button"
+													class="btn btn-default"></button></td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- /.row -->
+			<div class="row">
+				<div class="col-lg-12">
+					<div class="panel panel-default">
+						<div class="panel-heading" id="userListHeadingDiv">Ezkhata
+							Users List</div>
+						<!-- /.panel-heading -->
+						<div class="panel-body">
+							<table width="100%"
+								class="table table-striped table-bordered table-hover"
+								id="bluePayUsersTable">
+								<thead>
+									<tr>
+										<th>#</th>
+										<th>Name</th>
+										<th>Mobile No.</th>
+										<th>User Type</th>
+										<th>is Test User</th>
+										<th>is Active</th>
+										<th>Star Value</th>
+										<th>Total Earned Points</th>
+										<th>Signup Date Time</th>
+										<th>Signup Location</th>
+										<th>View Details</th>
+									</tr>
+								</thead>
+
+							</table>
+
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- /#wrapper -->
+
+			<!-- jQuery -->
+			<script src="../resources/vendor/jquery/jquery.min.js"></script>
+
+			<!-- Bootstrap Core JavaScript -->
+			<script src="../resources/vendor/bootstrap/js/bootstrap.min.js"></script>
+
+			<!-- Metis Menu Plugin JavaScript -->
+			<script src="../resources/vendor/metisMenu/metisMenu.min.js"></script>
+
+			<!-- DataTables JavaScript -->
+			<script
+				src="../resources/vendor/datatables/js/jquery.dataTables.min.js"></script>
+			<script
+				src="../resources/vendor/datatables-plugins/dataTables.bootstrap.min.js"></script>
+			<script
+				src="../resources/vendor/datatables-responsive/dataTables.responsive.js"></script>
+
+			<script
+				src="https://cdn.datatables.net/buttons/1.5.1/js/dataTables.buttons.min.js"></script>
+			<script
+				src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+			<script
+				src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.32/pdfmake.min.js"></script>
+			<script
+				src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.32/vfs_fonts.js"></script>
+			<script
+				src="https://cdn.datatables.net/buttons/1.5.1/js/buttons.html5.min.js"></script>
+			
+			<!--date picker jquery  -->
+			<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+			<!-- Custom Theme JavaScript -->
+			<script src="../resources/dist/js/sb-admin-2.js"></script>
+			<script src="../resources/js/blupay-users.js"></script>
+			<script>
+				$(document).ready(function() {
+					var a = '${flag}';
+					bluPay.init(a);
+
+				});
+			</script>
+</body>
+
+</html>

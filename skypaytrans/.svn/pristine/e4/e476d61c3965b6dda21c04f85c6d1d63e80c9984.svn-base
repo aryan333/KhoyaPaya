@@ -1,0 +1,169 @@
+package com.saifintex.dao;
+
+import java.util.Date;
+import java.util.List;
+
+import com.saifintex.domain.ChangePassword;
+import com.saifintex.domain.ForgotPassword;
+import com.saifintex.domain.TransactionDetail;
+import com.saifintex.domain.UpdatePin;
+import com.saifintex.domain.UpdateRelationParams;
+import com.saifintex.domain.UpdateUserParams;
+import com.saifintex.domain.User;
+import com.saifintex.domain.UserPaymentDetail;
+import com.saifintex.dto.DashboardDataDateParams;
+import com.saifintex.dto.UserStatsReportDTO;
+import com.saifintex.entity.ProfileImageEntity;
+import com.saifintex.entity.UserContactsDetailEntity;
+import com.saifintex.entity.UserEntity;
+import com.saifintex.entity.UserLoginLocationEntity;
+import com.saifintex.entity.UsersBalanceEntity;
+import com.saifintex.web.dto.LatLngDTO;
+import com.saifintex.web.dto.QrMappedUserDetailDTO;
+import com.saifintex.web.dto.SalesPersonReferalInfoDTO;
+import com.saifintex.web.dto.UsersListDTO;
+import com.saifintex.web.dto.UsersStatsDashboardDTO;
+
+public interface UserDAO extends BaseDAO<UserEntity, Integer> {
+
+	// public int insertUser(User user ,String userType,String promoCode);
+	public int registerUser(UserEntity userEntity);
+
+	public User getUser(String userLogin, String password, String userType);
+
+	public int inserContacts(List<UserContactsDetailEntity> list);
+	/*
+	 * fetch all data by user id
+	 * 
+	 * @param userId
+	 */
+
+	public UserEntity getUserById(int userId);
+
+	public int inserPayment(UserPaymentDetail userPaymentDetail);
+
+	/*
+	 * fetch all data if param matched
+	 * 
+	 * @param userLogin - mobileNumber
+	 */
+
+	public List getUserByLogin(String userLogin);
+
+	public List getUserByStandee(String standeeId);
+
+	public List<Object> getUserByLoginAndOtherParams(String userLogin);
+
+	/*
+	 * check if mobile does exist in db
+	 * 
+	 * @param mobile - mobileNumber
+	 */
+	public List<UserEntity> getAllUsers();
+
+	public UserEntity doesUserExist(String mobile);
+
+	public List<TransactionDetail> getUserTransactionHistoryById(int userId);
+
+	public boolean updateUserInfo(UpdateUserParams user);
+
+	/*
+	 * change password if user forgot
+	 * 
+	 * @param mobile - mobileNumber
+	 */
+	public boolean updatePassword(ForgotPassword forgotPassword);
+
+	/*
+	 * change password if user wants to change the old password
+	 * 
+	 * @param mobile - mobileNumber
+	 */
+	public boolean changePassword(ChangePassword changePassword);
+
+	public int insertProfileImage(ProfileImageEntity entity);
+
+	public int insertLoginLocations(UserLoginLocationEntity entity);
+
+	public UserEntity updateUser(UserEntity userEntity);
+
+	public UserEntity getStarValue(int userId);
+
+	public List<UserEntity> getAssociatedUsers(int id);
+
+	public List<Object> fetchRelations();
+
+	public int saveRelation(UpdateRelationParams params);
+
+	public Object[] getIndividualRelation(int loginId, int oppId);
+
+	public boolean savePin(int uId, String pin);
+
+	public boolean updatePin(UpdatePin updatePin);
+
+	public boolean saveGstinNumber(int userId, String gstinNumber);
+
+	public UsersBalanceEntity getUserBalanceEntityForMutualBalance(int userId1, int userId2);
+
+	public UsersStatsDashboardDTO getUserStats(Date startDateCurrWeek, int month);
+
+	public List<UserEntity> getAllBluPayUsers();
+
+	public List<UserEntity> getAllRegisteredBluPayUsers();
+
+	public List<UserEntity> getAllTemporaryBluPayUsers();
+
+	public List<UserEntity> getAllRegisteredUsersToday();
+
+	public List<UserEntity> getAllTemporaryUsersToday();
+
+	public List<UserEntity> getAllUsersToday();
+
+	public int updateFCMToken(int userId, String token);
+
+	public UserEntity getToken(int userId);
+
+	public List<String> getTokenOfAllUsers();
+
+	public String getTokenOfIndiviual(String mob);
+
+	public void getUserWithAllInfo(String mob);
+
+	public List<Object[]> fetchEarnedPointsDetail(int userId, int pageSize);
+
+	public List<UserEntity> getAllUsersBetweenDateRange(Date startDate, Date endDate, String flag);
+
+	public List<UserEntity> getAllUsersInCurrentWeek(Date startDateOfCurrWeek);
+
+	public List<UserEntity> getAllRegisteredUsersInCurrentWeek(Date startDateOfCurrWeek);
+
+	public List<UserEntity> getAllTempUsersInCurrentWeek(Date startDateOfCurrWeek);
+
+	public List<UserEntity> getAllTemporaryUsersInCurrentMonth(int month);
+
+	public List<UserEntity> getAllRegsiteredUsersInCurrentMonth(int month);
+
+	public List<UserEntity> getAllUsersInCurrentMonth(int month);
+
+	public UsersStatsDashboardDTO getUsersStatsBetweenDateRange(Date startDate, Date endDate);
+
+	public UserStatsReportDTO getUserStats(DashboardDataDateParams dateParams, boolean includeTestUsers);
+
+	public List<Long> getActiveUsersCount(DashboardDataDateParams dateParams, boolean includeTestUser);
+
+	public List<UsersListDTO> getActiveUsersList(Date startDate, Date endDate, boolean includeTestUsers);
+
+	public List<UsersListDTO> getOnBoardedUsers(Date startDate, Date endDate, boolean includeTestUser);
+
+	public List<UsersListDTO> getInactiveUsers(Date startDate, Date endDate, boolean includeTestUsers);
+
+	public List<LatLngDTO> findOnBoardedUsersLatLng();
+
+	public List<UsersListDTO> getReferalUsers(Date startDate, Date endDate, String inviteCode);
+
+	public List<SalesPersonReferalInfoDTO> SalesInfoReferal(DashboardDataDateParams dateParams);
+
+	public List<QrMappedUserDetailDTO> getQrMappedUsers();
+
+	public UserEntity getOnlyUserByUserLogin(String userLogin);
+}

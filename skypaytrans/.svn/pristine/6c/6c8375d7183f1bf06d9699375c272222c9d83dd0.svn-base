@@ -1,0 +1,108 @@
+
+<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@taglib prefix="sec"
+	uri="http://www.springframework.org/security/tags"%>
+<!-- Navigation -->
+<html>
+<head>
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body onload="loadRemainingOtp()">
+	<nav class="navbar navbar-default navbar-static-top fixed-navbar"
+		role="navigation">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle" data-toggle="collapse"
+				data-target=".navbar-collapse">
+				<span class="sr-only">Toggle navigation</span> <span
+					class="icon-bar"></span> <span class="icon-bar"></span> <span
+					class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" href="dashboard">Ezkhata Admin</a>
+		</div>
+		<!-- /.navbar-header -->
+
+		<ul class="nav navbar-top-links navbar-right ">
+		
+		<li style="padding: 0px 34px 0px 0px;">OTP Remaining <span id="otpRemaining"><img style="max-height: 50px;max-width: 50px;" src="../resources/images/otpcount.gif"></span>
+				<%-- <li>Welcome <sec:authentication property="principal.username"></sec:authentication> --%>
+			</li>
+			
+			<li>Welcome <c:out value="${sessionScope.user.firstName}"></c:out>
+				<%-- <li>Welcome <sec:authentication property="principal.username"></sec:authentication> --%>
+			</li>
+			
+			
+			<li class="dropdown"><a class="dropdown-toggle"
+				data-toggle="dropdown" href="#"> <i class="fa fa-user fa-fw"></i>
+					<i class="fa fa-caret-down"></i>
+			</a>
+				<ul class="dropdown-menu dropdown-user">
+					<li><a href="profile"><i class="fa fa-user fa-fw"></i> My
+							Profile</a></li>					
+					<li class="divider"></li>
+					<li><a href="logout"><i class="fa fa-sign-out fa-fw"></i>
+							Logout</a></li>
+					<li class="divider"></li>
+					<li><a href="appPreferences"><i class="fa fa-cog" aria-hidden="true"></i>
+							App Preferences</a></li>
+					<li class="divider"></li>
+					<li><a href="mastertable"><i class="fa fa-list"></i>
+							Master Table</a></li>	
+							<li class="divider"></li>
+					<li><a href="databaseDetail"><i class="fas fa-database"></i>
+							Database Detail</a></li>	
+				</ul> <!-- /.dropdown-user --></li>
+			<!-- /.dropdown -->
+		</ul>
+		<!-- /.navbar-top-links -->
+
+		<div class="navbar-default sidebar" role="navigation">
+			<div class="sidebar-nav navbar-collapse collapse in">
+				<ul class="nav" id="side-menu">
+					<li><a href="dashboard"><i class="fa fa-dashboard fa-fw"></i>
+							Dashboard</a></li>
+					<li><a href="transactions?txnType=all"><i
+							class="fa fa-exchange" aria-hidden="true"></i> Transactions</a></li>
+
+					<!-- <li><a href=blupayUsers?flag=all><i class="fa fa-users"
+							aria-hidden="true"></i> BluPay Users</a></li> -->
+
+					<li><a href="#"><i class="fa fa-users"
+							aria-hidden="true"></i>
+							Users<span class="fa arrow"></span></a>
+						<ul class="nav nav-second-level">
+							<li><a href="#"> Administrative</a></li>							
+							<li><a href="#"> Ezkhata Users <span class="fa arrow"></span></a>
+								<ul class="nav nav-third-level">
+									<li><a href="blupayUsers?flag=all"> All Users</a></li>
+									<li><a href="findUser"> Find a User</a></li>									
+								</ul> <!-- /.nav-third-level --></li>
+						</ul> <!-- /.nav-second-level --></li>
+					<li><a href="notification"><i class="fa fa-bell"
+							aria-hidden="true"></i> Notifications</a> <!-- /.nav-second-level -->
+					</li>
+					
+					
+					<li><a href="bugReports"><i class="fa fa-bug"
+							aria-hidden="true"></i> Bug Reports</a> <!-- /.nav-second-level --></li>
+					<li><a href="feedback"><i class="fa fa-comments-o"
+							aria-hidden="true"></i> Feedback</a></li>
+					<li><a href="contactus"><i class="fa fa-envelope"
+							aria-hidden="true"></i> Contact Us</a></li>
+					<li><a href="registrationForm"><i class="fa fa-envelope"
+							aria-hidden="true"></i> Create Web User</a></li>
+					<li><a href="qrcodes"><i class="fa fa-qrcode"
+							aria-hidden="true"></i> QR Codes</a> <!-- /.nav-second-level -->
+					</li>
+				</ul>
+			</div>
+			<!-- /.sidebar-collapse -->
+		</div>
+		<!-- /.navbar-static-side -->
+	</nav>
+</body>
+<script src="../resources/js/otpcount.js"></script>
+
+</script>
+</html>

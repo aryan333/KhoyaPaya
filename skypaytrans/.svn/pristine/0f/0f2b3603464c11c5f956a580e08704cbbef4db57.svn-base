@@ -1,0 +1,58 @@
+package com.saifintex.dao.impl;
+
+import java.util.List;
+
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+import com.saifintex.common.AbstractBase;
+import com.saifintex.dao.MessageDAO;
+import com.saifintex.entity.MessageEntity;
+@Repository("messageDao")
+public class MessageDAOImpl extends AbstractBase implements MessageDAO {
+
+
+
+	@Autowired
+	SessionFactory sessionFactory;
+
+
+
+
+	@Override
+	public int insertMessageDetail(final List<MessageEntity> messageList) {
+
+		Session session=sessionFactory.openSession();
+		Integer result=new Integer(0);
+		try{
+			session.beginTransaction();
+			Query query = null;
+			for(int i=0;i<messageList.size();i++){
+				MessageEntity messageEntity=messageList.get(i);
+				query = session.createQuery("select count(m) from MessageEntity m where m.deviceId = :deviceId " + 
+						"and m.time= :time").setParameter("deviceId", messageEntity.getDeviceId()).setParameter("time", messageEntity.getTime());
+				Long numNameDuplicates = (Long)query.uniqueResult();
+				getLogger().info("long="+numNameDuplicates);
+				if(numNameDuplicates <= 0){
+					result=(Integer)session.save(messageEntity);
+				}
+				if(i%50==0){
+					session.flush();
+					session.clear();
+				}
+			}
+			session.getTransaction().commit();
+		}catch(ConstraintViolationException e){
+			getLogger().error(e);
+			e.printStackTrace();
+		}
+		session.close();
+		return result;
+
+	}
+
+}

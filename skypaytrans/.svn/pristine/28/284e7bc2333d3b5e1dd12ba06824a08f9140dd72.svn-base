@@ -1,0 +1,179 @@
+package com.saifintex.services;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.web.multipart.commons.CommonsMultipartFile;
+
+import com.saifintex.domain.ChangePassword;
+import com.saifintex.domain.ForgotPassword;
+import com.saifintex.domain.ForgotPin;
+import com.saifintex.domain.NotificationEnableParams;
+import com.saifintex.domain.TransactionDetail;
+import com.saifintex.domain.UpdatePin;
+import com.saifintex.domain.UpdateRelationParams;
+import com.saifintex.domain.UpdateUserParams;
+import com.saifintex.domain.User;
+import com.saifintex.domain.UserContactsDetail;
+import com.saifintex.domain.UserPaymentDetail;
+import com.saifintex.dto.RelationsDTO;
+import com.saifintex.dto.UserDTO;
+import com.saifintex.dto.UserPointsEarnedDetailDTO;
+import com.saifintex.dto.UserProfileDTO;
+import com.saifintex.dto.UserStatsReportDTO;
+import com.saifintex.dto.UserWithOpponentUserBalanceDto;
+import com.saifintex.web.dto.LatLngDTO;
+import com.saifintex.web.dto.QrMappedUserDetailDTO;
+import com.saifintex.web.dto.SalesPersonReferalInfoDTO;
+import com.saifintex.web.dto.TotalReferalUserBySPDTO;
+import com.saifintex.web.dto.TransactionStatsDashboardDTO;
+import com.saifintex.web.dto.UsersListDTO;
+import com.saifintex.web.dto.UsersStatsDashboardDTO;
+
+public interface UserService {
+
+	public UserDTO signUp(UserDTO userDto);
+
+	public String updateProfileImage(UserProfileDTO dto);
+
+	public boolean uploadFile(CommonsMultipartFile file, String path, String fileName);
+
+	public UserDTO isUserAlreadyExist(String mobileNumber);
+
+	public int insertPayment(UserPaymentDetail userPaymentDetail);
+
+	public Object signIn(String userLogin, String password, String lat, String lng);
+
+	public UserDTO getUserById(int userId);
+
+	public User getUserForPay(String userId, String amount, String description);
+
+	public boolean updateUserPassword(ForgotPassword forgotPassword);
+
+	public List<TransactionDetail> getTransactionHistory(int userId);
+
+	public int changePassword(ChangePassword changePassword);
+
+	public int getUserId(String userLogin);
+
+	public boolean updateUserInfo(UpdateUserParams user);
+
+	public int insertLoginLocations(String lat, String lon, int userId);
+
+	public UserWithOpponentUserBalanceDto createTempUser(UserDTO userDto);
+
+	public UserDTO updateUser(UserDTO userDto);
+
+	public UserDTO getStarValue(int userId);
+
+	public List<UserContactsDetail> checkUserContactsExistance(List<UserContactsDetail> list);
+
+	public List<UserContactsDetail> checkUserContactsExistanceD(List<UserContactsDetail> list);
+
+	public List<UserDTO> getAssociatedUsers(int id);
+
+	public List<RelationsDTO> getRelationsService();
+
+	public boolean saveRelationService(UpdateRelationParams params);
+
+	public Map<String, String> getIndividualRelationService(int loginId, int oppId);
+
+	public boolean isPinValid(int userId, String pin);
+
+	public boolean savePinService(int uId, String pin);
+
+	public int updatePin(UpdatePin updatePin);
+
+	public int resetPinService(ForgotPin forgotPin);
+
+	public boolean saveGstinNumber(int userId, String gstinNumber);
+
+	public UserDTO getUserByLogin(String username);
+	
+	public UserDTO getUserByStandee(String standeeId);
+
+
+	public Object getUserByLoginAndOtherParamsService(String username);
+
+	public UserDTO getOnlyUserInfoByLogin(String mobile);
+
+	public BigDecimal getMutualBalance(int loggedInUserId, int opponentUserId);
+
+	public UsersStatsDashboardDTO usersStatsService();
+
+	public TransactionStatsDashboardDTO getSpecificUserTransStats(int userId);
+
+	public List<UserDTO> getAllBluPayUsersService();
+
+	public List<UserDTO> getRegisteredBluPayUsersService();
+
+	public List<UserDTO> getTemporaryBluPayUsersService();
+
+	public List<UserDTO> getNewRegisteredBluPayUsersTodayService();
+
+	public List<UserDTO> getNewTemporaryBluPayUsersTodayService();
+
+	public List<UserDTO> getNewBluPayUsersTodayService();
+
+	public String getToken(int userId);
+
+	public int updateFCMToken(int userId, String token);
+
+	public List<String> getTokenOfAllUsers();
+	
+	public String getTokenOfIndiviual(String mob);
+
+	public UserWithOpponentUserBalanceDto getBalanceIfUserExist(int loggedInUserId, String opponentUserLogin);
+	
+	public UserWithOpponentUserBalanceDto getBalanceIfStandeeUserExist(int loggedInUserId, String standeeId);
+
+
+	public UserDTO enableDisableNotification(NotificationEnableParams params);
+
+	public void deactivateUserService(String userLogin, String action);
+
+	public void activateUserService(String userLogin, String fieldToUpdate);
+
+	public List<UserPointsEarnedDetailDTO> getUserEarnedPointsDetail(int userId, int pageSize);
+
+	public List<UserDTO> getUsersBetweenDateRangeService(String sDate, String eDate, String flag);
+
+	public List<UserDTO> getUsersInCurrWeekService();
+
+	public List<UserDTO> getRegisteredUsersInCurrWeekService();
+
+	public List<UserDTO> getTemporaryUsersInCurrWeekService();
+
+	public List<UserDTO> getUsersInCurrMonthService();
+
+	public List<UserDTO> getRegUsersInCurrMonthService();
+
+	public List<UserDTO> getTempUsersInCurrMonthService();
+
+	public UsersStatsDashboardDTO getUserStatsBetweenDateRangeService(String startDate, String endDate);
+
+	public UserStatsReportDTO getUserStatsReport(boolean includeTestUser);
+
+	public List<UsersListDTO> getActiveUsersList(String period, boolean testUsers);
+
+	public List<UsersListDTO> getOnBoardedUsersService(String period, boolean includeTestUser);
+	
+	public List<UsersListDTO> getBlockedUsers(boolean isIncludeTestUsers,String period);
+	
+	public List<LatLngDTO> getOnBoardedUsersLatLng();
+	
+	public List<QrMappedUserDetailDTO> getQrMappedUsers();
+	
+	public TotalReferalUserBySPDTO getTotalUsersBySP();
+
+	public List<SalesPersonReferalInfoDTO> SalesPersonReferalInfo();
+
+    public List<UsersListDTO> getReferalUsersService(String period, String inviteCode,String userType);
+    
+    public List<UsersListDTO> getAllBySPReferalUsersService(String period,String userType);
+    
+    public List<LatLngDTO> getAllRegisteredUserBySPLatLng();
+    
+    public List<UsersListDTO> getReferalUsersLatLngService(String period, String inviteCode,String userType);
+}

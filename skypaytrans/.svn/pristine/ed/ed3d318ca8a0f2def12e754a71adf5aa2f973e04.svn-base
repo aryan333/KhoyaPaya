@@ -1,0 +1,91 @@
+package com.saifintex.controller.web;
+
+
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
+
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.saifintex.common.AbstractBase;
+import com.saifintex.services.QRGenerateService;
+import com.saifintex.services.QRGeneratedFileDetailService;
+import com.saifintex.web.dto.QRBulkZipDownloadResponseParams;
+import com.saifintex.web.dto.QRGeneratedFilesDetailDTO;
+
+@Controller
+@RequestMapping("/admin")
+public class QRGenerationController extends AbstractBase {
+	@Autowired
+	private QRGenerateService qrGenerateService;
+	
+	@Autowired
+	private QRGeneratedFileDetailService qrGeneratedFileDetailService;
+ @Value("${app.qr.maximum.number}")
+ private int maxNumber;
+@RequestMapping(value="/generateQRCodesInBulk/{number}",method=RequestMethod.GET)
+public  ResponseEntity<?> generateQRCodesInBulk(@PathVariable("number") int number){
+	
+	Map<String,String> responseMap=new HashMap<String,String>();
+	if(number>maxNumber) {
+		responseMap.put("response", "please enter upto "+maxNumber);
+		return new ResponseEntity<Map<String,String>>(responseMap,HttpStatus.BAD_REQUEST);
+	}
+	System.out.println("hello uin qr");
+	Object result=qrGenerateService.generateQRCodes(number);
+	if(result instanceof Boolean) {
+		responseMap.put("response", "succesfully generated");
+		return new ResponseEntity<Map<String,String>>(responseMap,HttpStatus.OK);
+	}
+	responseMap.put("response", "failed to generate qr code");
+	return new ResponseEntity<Map<String,String>>(responseMap,HttpStatus.BAD_REQUEST);
+	
+}
+
+@RequestMapping(value="/getQrFileDetails",method=RequestMethod.GET)
+public @ResponseBody ResponseEntity<?> getQrFileDetails(){
+	Map<String,List<QRGeneratedFilesDetailDTO>> responseMap=new HashMap<String,List<QRGeneratedFilesDetailDTO>>();
+	responseMap.put("data", qrGeneratedFileDetailService.findAll());
+	return new ResponseEntity<Map<String,List<QRGeneratedFilesDetailDTO>>>(responseMap,HttpStatus.OK);
+}
+
+@RequestMapping(value="/downloadQRFile/{fileName}",method=RequestMethod.GET)
+public @ResponseBody ResponseEntity<?> downloadQRFile(@PathVariable("fileName")String fileName){
+	System.out.println("filename="+fileName);
+ QRBulkZipDownloadResponseParams params=qrGenerateService.getFileDetailTODownload(fileName);
+	
+ HttpHeaders headers = new HttpHeaders();
+    headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
+    headers.add("Pragma", "public");
+    headers.add("Expires", "0");
+    headers.add("Content-Disposition", "attachment;filename=" + params.getFile().getName());
+    headers.add("Content-Transfer-Encoding", "binary");
+    headers.add("connection", "keep-alive");
+	  
+    return ResponseEntity
+            .ok()
+            .headers(headers)
+            .contentLength(params.getFile().length())
+            .contentType(MediaType.parseMediaType("application/x-compressed"))
+           // .body(new InputStreamResource(new FileInputStream(file.toFile())));
+            .body(params.getByteArrayResource());
+	
+	
+	
+}
+
+
+
+}

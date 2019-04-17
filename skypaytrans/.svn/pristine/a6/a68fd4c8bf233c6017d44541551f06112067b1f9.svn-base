@@ -1,0 +1,144 @@
+app.merchant.key = 782e6275-3db8
+app.customer.key = 41c1d823-15ba
+app.user.type = merchant
+app.FCMMerchantAuthKey= AIzaSyCiky4sKcmceRhzQ3KN79AIvjVHTkGNmEU
+app.FCMCustomerAuthKey= AIzaSyCiky4sKcmceRhzQ3KN79AIvjVHTkGNmEU
+app.FCMUrl= https://fcm.googleapis.com/fcm/send
+app.FCMAuthKey =AIzaSyCPiCdCVB_XaP4IAxd_qJ5UP0wlG1BUmR0
+app.otp.access.key=48ce17c3-6326-4736-9032-e34bbd748082
+#app.path.skypay.apk = F:\\blupay\\
+app.path.skypay.apk = /home/sai/saifintex/
+#app.path.skypay.apk = C:\\Users\\SaiFinTex\\Documents\\
+#database props
+database.driver.name=com.mysql.jdbc.Driver
+db.url=jdbc:mysql://103.62.239.230:3306/SkyPayDev
+database.username=root
+db.password=saifin
+
+domain.server = http://x1.saifintex.com:2020
+#domain.server = http://localhost:8080
+app.profile.pic.folder= /home/sai/SkyPay/Pictures/
+#app.profile.pic.folder= D:\\testdemo\\
+app.deployment.envt=linux
+app.skypay.apkName=blupay.apk
+
+#Application preferences
+app.temptransaction.timelimit = 48
+app.temp.userName=Non-App Person 
+response.error.client = we are sorry for the problem you are facing here. we will fix it soon.
+path.file.log.info = /logs/skypaytransprod_info.
+path.file.log.error = /logs/skypaytransprod_error.
+#path.file.log.info = /logs/skypaytransdemo_info.
+#path.file.log.error = /logs/skypaytransdemo_error.
+#path.file.log.info = /logs/skypaytransdev_info.
+#path.file.log.error = /logs/skypaytransdev_error.
+#path.file.log.info = /logs/skypaytransprod_info.
+#path.file.log.error = /logs/skypaytransprod_error.
+test.path.file.log.windows = C:\\myWorkspace\\spring-boot\\skypaytrans\\catalina.home_IS_UNDEFINED
+
+#relation default
+user.relation.default = Other
+user.relation.id = 5
+
+#Transaction ID Prefix
+transaction.id.prefix=4768
+transaction.id.truncate.value=4
+
+#user type
+admin.user.type = A
+permanent.user.type = P
+temporary.user.type = T
+user.type.registered = Registered
+user.type.unregistered = Unregistered
+
+#transaction type
+transaction.status.payment.pending = P
+transaction.status.payment.accepted = A
+transaction.status.payment.rejected = R
+transaction.status.payment.closed = C
+user.saicard.number.IIN=119796
+user.saicard.number.length=16
+
+#Admin Panel Session Time
+web.admin.session.time = 300
+
+#default star value
+user.default.star.value =1.00
+
+#Sai Card Status
+sai.card.status = Active
+
+#Notification properties
+app.reminder.notification.rec= You have been requested to pay Rs.
+app.reminder.notification.pending= notify you to accept transaction having bill Amount
+app.notify.signup = with your referral code has just signed up
+#SMS API Properties
+app.sms.api.key=Ad9e5XXXXXXXXXXXXX
+app.sms.api.method=Sender
+app.sms.api.base.url=https://promo.solutionsinfini.com/api/v4/?
+app.sms.message.to.non.app.person.part1=Your friend
+app.sms.message.to.non.app.person.part2=has initiated a transaction with you on ezkhata. To accept, Please click on 
+app.invite.url= http://x1.saifintex.com/i/
+
+#Transactions notification messages
+app.transaction.notify.insert.amount=A transaction is made by name having total amount of
+app.transaction.notify.insert.billamount=A transaction is made by name having bill amount of
+app.transaction.notify.accept.amount=Transaction is accepted By name having Amount
+app.transaction.notify.accept.billamount=Transaction is accepted By name having Bill Amount
+app.transaction.notify.reject.amount=Transaction is rejected By name having Amount
+app.transaction.notify.reject.billamount=Transaction is rejected By name having Bill Amount
+
+#max rows to fetch from db in one time
+app.maxResult=100
+app.maxResultForToPayToReceive = 100
+
+
+#Beta Tester Properties
+app.beta.unauthorized=You are not a beta tester. Please contact Saifintex.
+
+
+#server properties
+server.database.name=SkyPayTransLProd
+#OTP properties
+otp.sms=Your OTP is 
+otp.tries.limit=10
+otp.sms.send.limit=10
+#otp blocked time in hours
+otp.sms.unblock.time=2
+otp.max.tried.message=Too many OTP tried
+otp.max.send.message=Too many OTP sent
+otp.expire.message=OTP has been expired
+#otp expire time in minutes
+otp.expire.time=10
+otp.not.match.message=OTP doesn't match, Please try again
+otp.generatetion.problem.message=There is some problem generating OTP
+#app live date on production
+app.live.production.date = 2018-01-09
+app.live.production.date.jsp = 09/01/2018
+testing.mobile.numbers=3213213210,3213213211,3213213212,3213213213,3213213214,3213213215,3213213216,9643244749,7404313235,8685965575,8421661450,9811522364,9911236782,9599908104,8447275985,8445839186,8076912764
+
+
+otp.send.enable=false
+#otp.send.enable=false
+
+#mail properties
+
+mail.mailsubject=EzKhata Today's Statistics.
+mail.mailto=vkumar.suresh@gmail.com
+mail.mailto.cc=rohit@saifintex.in
+mail.mailhead=Hello Sir,
+mail.maildesc= Please find today's statistics of ezkhata.
+mail.mailfooter=Saifintex 504, Tower 1 ABC sector 135 Noida.
+email.password.reset.subject=Reset password link ezkhata
+app.invitation.timelimit = 48
+app.invitation.sms.limit= 5
+app.invite.sms.template = invited you on ezkhata app by making a credit transaction having amount
+app.invite.url1=. Click here to install the app http://x1.saifintex.com/i/
+#QR Properties
+app.qr.series.prefix=SAIFINTEXEK
+app.qr.standee.key=SAIEKSTANDEE
+app.qr.maximum.number=100
+app.qr.storage.path=F:\\qrcodes\\
+app.qr.domain=saifintex
+app.standee.not.null.msg=Standee Number can't be null
+app.standee.notmap.msg=Standee is not mapped

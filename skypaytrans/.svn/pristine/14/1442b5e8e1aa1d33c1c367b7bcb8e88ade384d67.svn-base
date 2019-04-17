@@ -1,0 +1,79 @@
+email.required=please enter email.
+firstname.required=please enter first name.
+phoneno.required=please enter mobile number.
+password.required=please enter password.
+aadhaar.required=please enter aadhaar number.
+amount.required=please enter amount.
+description.required=please enter description.
+lastname.valid=please enter valid last name.
+firstname.valid=please enter valid first name.
+aadhaar.valid=please enter valid aadhaar number.
+address1.valid=please enter valid address.
+phoneno.valid=please enter valid mobile number
+phonno.not.empty=mobile field can not be empty
+password.valid=please enter valid password.
+amount.valid=please enter valid amount.
+description.valid=please enter valid description.
+email.valid=please enter valid email.
+NotBlank.referralCode = referral code can not be empty
+NotNull.enterprise=Enterprise may not be null
+NotNull.mobileNumber=Mobile Number may not be null
+NotNull.natureOfBusiness=Nature Of Business may not be null
+NotNull.shopArea=Shop area may not be null
+NotNull.installationStatus=Installation status may not be null
+NotBlank.installationStatus=Installation status may not be null
+NotNull.file=Please select file to upload
+NotBlank.file=Please select file to upload
+NotBlank.enterprise=Enterprise may not be null
+NotBlank.mobileNumber=Mobile Number may not be null
+NotBlank.natureOfBusiness=Nature Of Business may not be null
+NotBlank.shopArea=Shop area may not be null
+#
+Size.userLogin=mobile number not valid
+NotBlank.password= can not be blank.
+Pattern.changePassword.userType =  must have at least 8 characters
+Pattern.changePassword.userLogin =  should be numeric only
+Pattern.signin.userLogin = should be numeric only
+NotBlank.userId= can not be blank and must be numeric.
+Pattern.date =Must be in format yyyy-MM-dd.
+Pattern.aadhaarNumber = must be numeric of length 12
+Pattern.phNumber=please enter valid mobile number.
+Size.password=Password must between 4 and 10 characters.
+NotBlank.oldPassword=Old password can not be blank.
+Size.newPassword=New Password - min 4 and max 20
+oldpassword.doesnot.match=old password does not match
+#update user params validations
+Size.firstName = min 3 and max 10 is allowed.
+Pattern.firstName = please enter a valid name.
+Size.userParams.lastName = min 3 and max 10 is allowed.
+Pattern.userParams.lastName = please enter a valid name.
+Email.userParams.emailId = please enter a valid email.
+
+#Forgot pin params validations
+Length.pin=length should be of 4 digits
+NarrationSize= Description Must be less than 255 characters
+
+#admin form login validation
+Pattern.admin.mobileNumber = invalid mobile no.
+Size.admin.password = password required min 4 letter
+
+#reset password form validation message
+Size.resetPass.newPassword =password must lie between 4-20 characters
+NotEmpty.resetPass.newPassword =field can't be empty 
+NotEmpty.resetPass.confPassword =field can't be empty
+NotBlank.resetPass.newPassword =field can't be empty 
+NotBlank.resetPass.confPassword =field can't be empty
+
+#User Properties
+app.user.exists=User already exists
+app.user.invalid.credentials=Please enter valid username and password
+app.user.not.found=User not found
+app.user.not.exists=User doesn't exist
+app.user.temp.onboard.msg=name is on ezkhata
+
+#Transaction Properties
+cant.do.transaction.with.self=you can not do transaction with yourself
+no.transaction.found=no transaction found
+
+#Gstin Number validation
+app.gstin.cant.null=Gstin Number can't be null or empty

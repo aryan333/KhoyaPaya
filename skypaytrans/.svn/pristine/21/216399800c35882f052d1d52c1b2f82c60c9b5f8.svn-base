@@ -1,0 +1,140 @@
+package com.saifintex.utils;
+
+import java.text.DateFormatSymbols;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Map;
+
+public class DateUtils {
+
+	public static String getCurrentTimeWithMiliSeconds() {
+		Date dt = new Date();
+		java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SS");
+
+		String currentTime = sdf.format(dt);
+		return currentTime;
+	}
+
+	public static String getCurrentTime() {
+		Date dt = new Date();
+		java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+		String currentTime = sdf.format(dt);
+		return currentTime;
+	}
+
+	public static Date getCurrentDateTime() {
+		long time = System.currentTimeMillis();
+		Date date = new Date(time);
+		return date;
+	}
+
+	public static String getCurrentDate() {
+		Date date = new Date(System.currentTimeMillis());
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		String d = sdf.format(date);
+		return d;
+	}
+	
+	public static Date getCurrentDateInDateObject() {
+		return getDate(getCurrentDate());
+	}
+	
+	public static String getCurrentDateInDDMMYYYYFormat() {
+		Date date = new Date(System.currentTimeMillis());
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+		String d = sdf.format(date);
+		return d;
+	}
+	
+	public static String getDate(Date date) {
+		SimpleDateFormat sdf =new SimpleDateFormat("yyyy-MM-dd");		
+		return sdf.format(date);
+	}
+
+	public static String getDateInDDMMYYYYFormat(Date date) {
+		SimpleDateFormat sdf =new SimpleDateFormat("dd/MM/yyyy");
+		return sdf.format(date);
+	}
+	
+	public static Date getDate(String date) {
+
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+		Date formatedDate = null;
+		try {
+			formatedDate = formatter.parse(date);
+		} catch (ParseException e) {
+
+			e.printStackTrace();
+			return null;
+		}
+
+		return formatedDate;
+	}
+
+	public static Date getLastDateOfMonth(int year, int month) {
+		Calendar calendar = new GregorianCalendar(year, month, Calendar.DAY_OF_MONTH);
+		calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+		return calendar.getTime();
+	}
+
+	public static String getMonth(int month) {
+		return new DateFormatSymbols().getMonths()[month - 1];
+	}
+
+	public static Map<String, Date> getLastWeekDateRange() {
+		Date date = new Date();
+		Map<String, Date> dateRange = new HashMap<String, Date>();
+		Calendar c = Calendar.getInstance();
+		c.setTime(date);
+		int i = c.get(Calendar.DAY_OF_WEEK) - c.getFirstDayOfWeek();
+		c.add(Calendar.DATE, -i - 7);
+		Date start = c.getTime();
+		c.add(Calendar.DATE, 6);
+		Date end = c.getTime();
+		dateRange.put("startDate", start);
+		dateRange.put("endDate", end);
+		System.out.println(start + " - " + end);
+		return dateRange;
+	}
+
+	public static Date getStartDateOfCurrWeek() {
+		Calendar c = Calendar.getInstance();
+		c.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+		SimpleDateFormat sdf =  new SimpleDateFormat("yyyy-MM-dd");
+		String date = sdf.format(c.getTime());		
+		return getDate(date);
+	}
+	
+	public static int getCurrentMonth() {
+		Calendar c = Calendar.getInstance();
+		int month = c.get(Calendar.MONTH)+1;
+		return month;		
+	}
+	
+	/*public static Date getPreviousDayDate() {
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.DATE, -1);		
+		String date = getDate(cal.getTime());
+		return getDate(date);
+	}
+	*/
+	public static Date getDateBeforeCurrentDate(int numberOfDays) {
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.DATE, -(numberOfDays));		// for example - for yesterday, numberOfDays will be 1
+		String date = getDate(cal.getTime());
+		return getDate(date);
+	}
+	
+	public static String getDateBeforeCurrentDateInDDMMYYYYFormat(int numberOfDays) {
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.DATE, -(numberOfDays));		
+		String date = getDateInDDMMYYYYFormat(cal.getTime());
+		return date;
+	}
+	
+}

@@ -1,0 +1,133 @@
+package com.saifintex.dto;
+
+import org.springframework.web.multipart.commons.CommonsMultipartFile;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class UserRegisteredBySalesPersonDetailDto extends BaseDto {
+
+	private static final long serialVersionUID = 1L;
+
+	private String name;
+	private String mobileNumber;
+	private String enterprise;
+	private String natureOfbusiness;
+	private String brands;
+	private String shopArea;
+	private String installationStatus;
+	private String installationMedium;
+	private String modelOfDevice;
+	private CommonsMultipartFile file;
+	private String mappedName;
+	private int userId;
+
+	private String blobId;
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getMobileNumber() {
+		return mobileNumber;
+	}
+
+	public void setMobileNumber(String mobileNumber) {
+		this.mobileNumber = mobileNumber;
+	}
+
+	public String getEnterprise() {
+		return enterprise;
+	}
+
+	public void setEnterprise(String enterprise) {
+		this.enterprise = enterprise;
+	}
+
+	public String getNatureOfbusiness() {
+		return natureOfbusiness;
+	}
+
+	public void setNatureOfbusiness(String natureOfbusiness) {
+		this.natureOfbusiness = natureOfbusiness;
+	}
+
+	public String getBrands() {
+		return brands;
+	}
+
+	public void setBrands(String brands) {
+		this.brands = brands;
+	}
+
+	public String getShopArea() {
+		return shopArea;
+	}
+
+	public void setShopArea(String shopArea) {
+		this.shopArea = shopArea;
+	}
+
+	public String getInstallationStatus() {
+		return installationStatus;
+	}
+
+	public void setInstallationStatus(String installationStatus) {
+		this.installationStatus = installationStatus;
+	}
+
+	public String getInstallationMedium() {
+		return installationMedium;
+	}
+
+	public void setInstallationMedium(String installationMedium) {
+		this.installationMedium = installationMedium;
+	}
+
+	public String getModelOfDevice() {
+		return modelOfDevice;
+	}
+
+	public void setModelOfDevice(String modelOfDevice) {
+		this.modelOfDevice = modelOfDevice;
+	}
+
+	public CommonsMultipartFile getFile() {
+		return file;
+	}
+
+	public void setFile(CommonsMultipartFile file) {
+		this.file = file;
+	}
+
+	public String getMappedName() {
+		return mappedName;
+	}
+
+	public void setMappedName(String mappedName) {
+		this.mappedName = mappedName;
+	}
+
+	public int getUserId() {
+		return userId;
+	}
+
+	public void setUserId(int userId) {
+		this.userId = userId;
+	}
+
+	public String getBlobId() {
+		return blobId;
+	}
+
+	public void setBlobId(String blobId) {
+		this.blobId = blobId;
+	}
+	
+	
+
+}
